@@ -711,8 +711,8 @@ Returns all the reviews that belong to a spot specified by id.
 - Require Authentication: false
 - Request
 
-  - Method: ?
-  - Route path: ?
+  - Method: GET
+  - Route path: /spots/:spotId/reviews
   - Body: none
 
 - Successful Response
