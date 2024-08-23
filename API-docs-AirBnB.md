@@ -1,8 +1,8 @@
-# `<name of application here>`
+# `SleepInn`
 
 ## Database Schema Design
 
-`<insert database schema design here>`
+![Database design for SleepInn](sleepinn-db.png)
 
 ## API Documentation
 
