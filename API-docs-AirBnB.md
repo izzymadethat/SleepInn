@@ -50,7 +50,7 @@ Returns the information about the current user that is logged in.
 * Require Authentication: false
 * Request
   * Method: get
-  * Route path: users/currentUser
+  * Route path: /api/users/currentUser
   * Body: none
 
 * Successful Response when there is a logged in user
@@ -91,7 +91,7 @@ information.
 * Require Authentication: false
 * Request
   * Method: post
-  * Route path: /users/login
+  * Route path: /api/users/login
   * Headers:
     * Content-Type: application/json
   * Body:
@@ -157,7 +157,7 @@ user's information.
 * Require Authentication: false
 * Request
   * Method: post
-  * Route path: /users/signup
+  * Route path: /api/users/signup
   * Headers:
     * Content-Type: application/json
   * Body:
@@ -233,7 +233,7 @@ Returns all the spots.
 * Require Authentication: false
 * Request
   * Method: get
-  * Route path: /spots
+  * Route path: /api/spots
   * Body: none
 
 * Successful Response
@@ -273,7 +273,7 @@ Returns all the spots owned (created) by the current user.
 * Require Authentication: true
 * Request
   * Method: get
-  * Route path: /spots/:ownerId
+  * Route path: /api/spots/:ownerId
   * Body: none
 
 * Successful Response
@@ -313,7 +313,7 @@ Returns the details of a spot specified by its id.
 * Require Authentication: false
 * Request
   * Method: get
-  * Route path: /spots/:spotID
+  * Route path: /api/spots/:spotID
   * Body: none
 
 * Successful Response
@@ -378,7 +378,7 @@ Creates and returns a new spot.
 * Require Authentication: true
 * Request
   * Method: post
-  * Route path: /spots
+  * Route path: /api/spots
   * Headers:
     * Content-Type: application/json
   * Body:
@@ -452,7 +452,7 @@ Create and return a new image for a spot specified by id.
 * Require proper authorization: Spot must belong to the current user
 * Request
   * Method: post
-  * Route path: /image //or /spots/:spotId depending if we just want to do updates in one route
+  * Route path: /api/spots/:spotId/images
   * Headers:
     * Content-Type: application/json
   * Body:
@@ -498,7 +498,7 @@ Updates and returns an existing spot.
 * Require proper authorization: Spot must belong to the current user
 * Request
   * Method: post
-  * Route path: /spots/:spotId
+  * Route path: /api/spots/:spotId
   * Headers:
     * Content-Type: application/json
   * Body:
@@ -584,7 +584,7 @@ Deletes an existing spot.
 * Require proper authorization: Spot must belong to the current user
 * Request
   * Method: delete
-  * Route path: /spots/:spotId/delete
+  * Route path: /api/spots/:spotId/delete
   * Body: none
 
 * Successful Response
@@ -620,7 +620,7 @@ Returns all the reviews written by the current user.
 * Require Authentication: true
 * Request
   * Method: get
-  * Route path: /users/currentUser/reviews
+  * Route path: /api/users/currentUser/reviews
   * Body: none
 
 * Successful Response
@@ -668,23 +668,22 @@ Returns all the reviews written by the current user.
       ]
     }
     ```
+
 ### Get all Reviews by a Spot's id
 
 Returns all the reviews that belong to a spot specified by id.
 
-- Require Authentication: false
-- Request
+* Require Authentication: false
+* Request
+  * Method:get
+  * Route path: /api/spots/:spotId/reviews
+  * Body: none
 
-  - Method: GET
-  - Route path: /spots/:spotId/reviews
-  - Body: none
-
-- Successful Response
-
-  - Status Code: 200
-  - Headers:
-    - Content-Type: application/json
-  - Body:
+* Successful Response
+  * Status Code: 200
+  * Headers:
+    * Content-Type: application/json
+  * Body:
 
     ```json
     {
@@ -696,7 +695,7 @@ Returns all the reviews that belong to a spot specified by id.
           "review": "This was an awesome spot!",
           "stars": 5,
           "createdAt": "2021-11-19 20:39:36",
-          "updatedAt": "2021-11-19 20:39:36",
+          "updatedAt": "2021-11-19 20:39:36" ,
           "User": {
             "id": 1,
             "firstName": "John",
@@ -707,18 +706,17 @@ Returns all the reviews that belong to a spot specified by id.
               "id": 1,
               "url": "image url"
             }
-          ]
+          ],
         }
       ]
     }
     ```
 
-- Error response: Couldn't find a Spot with the specified id
-
-  - Status Code: 404
-  - Headers:
-    - Content-Type: application/json
-  - Body:
+* Error response: Couldn't find a Spot with the specified id
+  * Status Code: 404
+  * Headers:
+    * Content-Type: application/json
+  * Body:
 
     ```json
     {
@@ -734,7 +732,7 @@ Create and return a new review for a spot specified by id.
 - Request
 
   - Method: POST
-  - Route path: /spots/:spotId/reviews
+  - Route path: /api/spots/:spotId/reviews
   - Headers:
     - Content-Type: application/json
   - Body:
@@ -817,7 +815,7 @@ Create and return a new image for a review specified by id.
 - Request
 
   - Method: POST
-  - Route path: /reviews/:reviewId/images
+  - Route path: /api/reviews/:reviewId/images
   - Headers:
     - Content-Type: application/json
   - Body:
@@ -878,7 +876,7 @@ Update and return an existing review.
 - Request
 
   - Method: PUT
-  - Route path: /reviews/:reviewId
+  - Route path: /api/reviews/:reviewId
   - Headers:
     - Content-Type: application/json
   - Body:
@@ -948,7 +946,7 @@ Delete an existing review.
 - Request
 
   - Method: DELETE
-  - Route path: /reviews/:reviewId
+  - Route path: /api/reviews/:reviewId
   - Body: none
 
 - Successful Response
@@ -987,7 +985,7 @@ Return all the bookings that the current user has made.
 - Request
 
   - Method: GET
-  - Route path: /users/:userId/bookings
+  - Route path: /api/users/:userId/bookings
   - Body: none
 
 - Successful Response
@@ -1034,7 +1032,7 @@ Return all the bookings for a spot specified by id.
 - Request
 
   - Method: GET
-  - Route path: /spots/:spotId/bookings
+  - Route path: /api/spots/:spotId/bookings
   - Body: none
 
 - Successful Response: If you ARE NOT the owner of the spot.
@@ -1106,7 +1104,7 @@ Create and return a new booking from a spot specified by id.
 - Request
 
   - Method: POST
-  - Route path: /spots/:spotId/bookings
+  - Route path: /api/spots/:spotId/bookings
   - Headers:
     - Content-Type: application/json
   - Body:
@@ -1193,7 +1191,7 @@ Update and return an existing booking.
 - Request
 
   - Method: PUT
-  - Route path: /bookings/:bookingId
+  - Route path: /api/bookings/:bookingId
   - Headers:
     - Content-Type: application/json
   - Body:
@@ -1294,7 +1292,7 @@ Delete an existing booking.
 - Request
 
   - Method: DELETE
-  - Route path: /bookings/:bookingId
+  - Route path: /api/bookings/:bookingId
   - Body: none
 
 - Successful Response
@@ -1347,7 +1345,7 @@ Delete an existing image for a Spot.
 - Request
 
   - Method: DELETE
-  - Route path: /spots/:spotId/images/:imageId
+  - Route path: /api/spots/:spotId/images/:imageId
   - Body: none
 
 - Successful Response
@@ -1385,7 +1383,7 @@ Delete an existing image for a Review.
 - Request
 
   - Method: DELETE
-  - Route path: /reviews/:reviewId/images/:imageId
+  - Route path: /api/reviews/:reviewId/images/:imageId
   - Body: none
 
 - Successful Response
@@ -1422,7 +1420,7 @@ Return spots filtered by query parameters.
 - Request
 
   - Method: GET
-  - Route path: /spots (followed by a ? and the appropriate query params)
+  - Route path: /api/spots (followed by a ? and the appropriate query params)
   - Query Parameters
     - page: integer, minimum: 1, default: 1
     - size: integer, minimum: 1, maximum: 20, default: 20
