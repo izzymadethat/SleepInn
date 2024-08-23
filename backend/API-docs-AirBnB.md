@@ -50,7 +50,7 @@ Returns the information about the current user that is logged in.
 * Require Authentication: false
 * Request
   * Method: get
-  * Route path: /api/users/currentUser
+  * Route path: /api/session
   * Body: none
 
 * Successful Response when there is a logged in user
@@ -91,7 +91,7 @@ information.
 * Require Authentication: false
 * Request
   * Method: post
-  * Route path: /api/users/login
+  * Route path: /api/session
   * Headers:
     * Content-Type: application/json
   * Body:
@@ -157,7 +157,7 @@ user's information.
 * Require Authentication: false
 * Request
   * Method: post
-  * Route path: /api/users/signup
+  * Route path: /api/users
   * Headers:
     * Content-Type: application/json
   * Body:
@@ -313,7 +313,7 @@ Returns the details of a spot specified by its id.
 * Require Authentication: false
 * Request
   * Method: get
-  * Route path: /api/spots/:spotID
+  * Route path: /api/spots/:spotId
   * Body: none
 
 * Successful Response
@@ -584,7 +584,7 @@ Deletes an existing spot.
 * Require proper authorization: Spot must belong to the current user
 * Request
   * Method: delete
-  * Route path: /api/spots/:spotId/delete
+  * Route path: /api/spots/:spotId
   * Body: none
 
 * Successful Response
@@ -985,7 +985,7 @@ Return all the bookings that the current user has made.
 - Request
 
   - Method: GET
-  - Route path: /api/users/:userId/bookings
+  - Route path: /api/bookings/current
   - Body: none
 
 - Successful Response
@@ -1345,7 +1345,7 @@ Delete an existing image for a Spot.
 - Request
 
   - Method: DELETE
-  - Route path: /api/spots/:spotId/images/:imageId
+  - Route path: /api/spot-images/:imageId
   - Body: none
 
 - Successful Response
