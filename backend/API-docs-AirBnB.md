@@ -2,7 +2,7 @@
 
 ## Database Schema Design
 
-![Database design for SleepInn](sleepinn-db.png)
+![Database design for SleepInn](../sleepinn-db.png)
 
 ## API Documentation
 
