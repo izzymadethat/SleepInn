@@ -1,7 +1,11 @@
 // This file serves as the main file to export all routes
 
 const express = require("express");
+const apiRouter = require("./api");
 const router = express.Router();
+
+// handle all routes beginning with /api
+router.use("/api", apiRouter);
 
 /* 
     Restore a user token upon request
