@@ -2,7 +2,7 @@
 
 ## Database Schema Design
 
-![Database design for SleepInn](../sleepinn-db.png)
+![Database design for SleepInn](../images/sleepinn-db.png)
 
 ## API Documentation
 
@@ -12,12 +12,13 @@
 
 All endpoints that require a current user to be logged in.
 
-* Request: endpoints that require authentication
-* Error Response: Require authentication
-  * Status Code: 401
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Request: endpoints that require authentication
+- Error Response: Require authentication
+
+  - Status Code: 401
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -30,12 +31,13 @@ All endpoints that require a current user to be logged in.
 All endpoints that require authentication and the current user does not have the
 correct role(s) or permission(s).
 
-* Request: endpoints that require proper authorization
-* Error Response: Require proper authorization
-  * Status Code: 403
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Request: endpoints that require proper authorization
+- Error Response: Require proper authorization
+
+  - Status Code: 403
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -47,17 +49,19 @@ correct role(s) or permission(s).
 
 Returns the information about the current user that is logged in.
 
-* Require Authentication: false
-* Request
-  * Method: get
-  * Route path: /api/session
-  * Body: none
+- Require Authentication: false
+- Request
 
-* Successful Response when there is a logged in user
-  * Status Code: 200
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+  - Method: get
+  - Route path: /api/session
+  - Body: none
+
+- Successful Response when there is a logged in user
+
+  - Status Code: 200
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -71,11 +75,12 @@ Returns the information about the current user that is logged in.
     }
     ```
 
-* Successful Response when there is no logged in user
-  * Status Code: 200
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Successful Response when there is no logged in user
+
+  - Status Code: 200
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -88,13 +93,14 @@ Returns the information about the current user that is logged in.
 Logs in a current user with valid credentials and returns the current user's
 information.
 
-* Require Authentication: false
-* Request
-  * Method: post
-  * Route path: /api/session
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Require Authentication: false
+- Request
+
+  - Method: post
+  - Route path: /api/session
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -103,11 +109,12 @@ information.
     }
     ```
 
-* Successful Response
-  * Status Code: 200
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Successful Response
+
+  - Status Code: 200
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -121,11 +128,12 @@ information.
     }
     ```
 
-* Error Response: Invalid credentials
-  * Status Code: 401
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Error Response: Invalid credentials
+
+  - Status Code: 401
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -133,11 +141,12 @@ information.
     }
     ```
 
-* Error response: Body validation errors
-  * Status Code: 400
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Error response: Body validation errors
+
+  - Status Code: 400
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -154,13 +163,14 @@ information.
 Creates a new user, logs them in as the current user, and returns the current
 user's information.
 
-* Require Authentication: false
-* Request
-  * Method: post
-  * Route path: /api/users
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Require Authentication: false
+- Request
+
+  - Method: post
+  - Route path: /api/users
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -172,11 +182,12 @@ user's information.
     }
     ```
 
-* Successful Response
-  * Status Code: 201
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Successful Response
+
+  - Status Code: 201
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -190,11 +201,12 @@ user's information.
     }
     ```
 
-* Error response: User already exists with the specified email or username
-  * Status Code: 500
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Error response: User already exists with the specified email or username
+
+  - Status Code: 500
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -206,11 +218,12 @@ user's information.
     }
     ```
 
-* Error response: Body validation errors
-  * Status Code: 400
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Error response: Body validation errors
+
+  - Status Code: 400
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -230,17 +243,19 @@ user's information.
 
 Returns all the spots.
 
-* Require Authentication: false
-* Request
-  * Method: get
-  * Route path: /api/spots
-  * Body: none
+- Require Authentication: false
+- Request
 
-* Successful Response
-  * Status Code: 200
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+  - Method: get
+  - Route path: /api/spots
+  - Body: none
+
+- Successful Response
+
+  - Status Code: 200
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -270,17 +285,19 @@ Returns all the spots.
 
 Returns all the spots owned (created) by the current user.
 
-* Require Authentication: true
-* Request
-  * Method: get
-  * Route path: /api/spots/:ownerId
-  * Body: none
+- Require Authentication: true
+- Request
 
-* Successful Response
-  * Status Code: 200
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+  - Method: get
+  - Route path: /api/spots/:ownerId
+  - Body: none
+
+- Successful Response
+
+  - Status Code: 200
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -310,17 +327,19 @@ Returns all the spots owned (created) by the current user.
 
 Returns the details of a spot specified by its id.
 
-* Require Authentication: false
-* Request
-  * Method: get
-  * Route path: /api/spots/:spotId
-  * Body: none
+- Require Authentication: false
+- Request
 
-* Successful Response
-  * Status Code: 200
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+  - Method: get
+  - Route path: /api/spots/:spotId
+  - Body: none
+
+- Successful Response
+
+  - Status Code: 200
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -336,7 +355,7 @@ Returns the details of a spot specified by its id.
       "description": "Place where web developers are created",
       "price": 123,
       "createdAt": "2021-11-19 20:39:36",
-      "updatedAt": "2021-11-19 20:39:36" ,
+      "updatedAt": "2021-11-19 20:39:36",
       "numReviews": 5,
       "avgStarRating": 4.5,
       "SpotImages": [
@@ -359,11 +378,12 @@ Returns the details of a spot specified by its id.
     }
     ```
 
-* Error response: Couldn't find a Spot with the specified id
-  * Status Code: 404
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Error response: Couldn't find a Spot with the specified id
+
+  - Status Code: 404
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -375,13 +395,14 @@ Returns the details of a spot specified by its id.
 
 Creates and returns a new spot.
 
-* Require Authentication: true
-* Request
-  * Method: post
-  * Route path: /api/spots
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Require Authentication: true
+- Request
+
+  - Method: post
+  - Route path: /api/spots
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -397,11 +418,12 @@ Creates and returns a new spot.
     }
     ```
 
-* Successful Response
-  * Status Code: 201
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Successful Response
+
+  - Status Code: 201
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -421,11 +443,12 @@ Creates and returns a new spot.
     }
     ```
 
-* Error Response: Body validation errors
-  * Status Code: 400
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Error Response: Body validation errors
+
+  - Status Code: 400
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -448,14 +471,15 @@ Creates and returns a new spot.
 
 Create and return a new image for a spot specified by id.
 
-* Require Authentication: true
-* Require proper authorization: Spot must belong to the current user
-* Request
-  * Method: post
-  * Route path: /api/spots/:spotId/images
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Require Authentication: true
+- Require proper authorization: Spot must belong to the current user
+- Request
+
+  - Method: post
+  - Route path: /api/spots/:spotId/images
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -464,11 +488,12 @@ Create and return a new image for a spot specified by id.
     }
     ```
 
-* Successful Response
-  * Status Code: 201
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Successful Response
+
+  - Status Code: 201
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -478,11 +503,12 @@ Create and return a new image for a spot specified by id.
     }
     ```
 
-* Error response: Couldn't find a Spot with the specified id
-  * Status Code: 404
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Error response: Couldn't find a Spot with the specified id
+
+  - Status Code: 404
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -494,14 +520,15 @@ Create and return a new image for a spot specified by id.
 
 Updates and returns an existing spot.
 
-* Require Authentication: true
-* Require proper authorization: Spot must belong to the current user
-* Request
-  * Method: post
-  * Route path: /api/spots/:spotId
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Require Authentication: true
+- Require proper authorization: Spot must belong to the current user
+- Request
+
+  - Method: post
+  - Route path: /api/spots/:spotId
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -517,11 +544,12 @@ Updates and returns an existing spot.
     }
     ```
 
-* Successful Response
-  * Status Code: 200
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Successful Response
+
+  - Status Code: 200
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -541,11 +569,12 @@ Updates and returns an existing spot.
     }
     ```
 
-* Error Response: Body validation errors
-  * Status Code: 400
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Error Response: Body validation errors
+
+  - Status Code: 400
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -564,11 +593,12 @@ Updates and returns an existing spot.
     }
     ```
 
-* Error response: Couldn't find a Spot with the specified id
-  * Status Code: 404
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Error response: Couldn't find a Spot with the specified id
+
+  - Status Code: 404
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -580,18 +610,20 @@ Updates and returns an existing spot.
 
 Deletes an existing spot.
 
-* Require Authentication: true
-* Require proper authorization: Spot must belong to the current user
-* Request
-  * Method: delete
-  * Route path: /api/spots/:spotId
-  * Body: none
+- Require Authentication: true
+- Require proper authorization: Spot must belong to the current user
+- Request
 
-* Successful Response
-  * Status Code: 200
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+  - Method: delete
+  - Route path: /api/spots/:spotId
+  - Body: none
+
+- Successful Response
+
+  - Status Code: 200
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -599,11 +631,12 @@ Deletes an existing spot.
     }
     ```
 
-* Error response: Couldn't find a Spot with the specified id
-  * Status Code: 404
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Error response: Couldn't find a Spot with the specified id
+
+  - Status Code: 404
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -617,17 +650,19 @@ Deletes an existing spot.
 
 Returns all the reviews written by the current user.
 
-* Require Authentication: true
-* Request
-  * Method: get
-  * Route path: /api/users/currentUser/reviews
-  * Body: none
+- Require Authentication: true
+- Request
 
-* Successful Response
-  * Status Code: 200
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+  - Method: get
+  - Route path: /api/users/currentUser/reviews
+  - Body: none
+
+- Successful Response
+
+  - Status Code: 200
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -639,7 +674,7 @@ Returns all the reviews written by the current user.
           "review": "This was an awesome spot!",
           "stars": 5,
           "createdAt": "2021-11-19 20:39:36",
-          "updatedAt": "2021-11-19 20:39:36" ,
+          "updatedAt": "2021-11-19 20:39:36",
           "User": {
             "id": 1,
             "firstName": "John",
@@ -673,17 +708,19 @@ Returns all the reviews written by the current user.
 
 Returns all the reviews that belong to a spot specified by id.
 
-* Require Authentication: false
-* Request
-  * Method:get
-  * Route path: /api/spots/:spotId/reviews
-  * Body: none
+- Require Authentication: false
+- Request
 
-* Successful Response
-  * Status Code: 200
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+  - Method:get
+  - Route path: /api/spots/:spotId/reviews
+  - Body: none
+
+- Successful Response
+
+  - Status Code: 200
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {
@@ -695,7 +732,7 @@ Returns all the reviews that belong to a spot specified by id.
           "review": "This was an awesome spot!",
           "stars": 5,
           "createdAt": "2021-11-19 20:39:36",
-          "updatedAt": "2021-11-19 20:39:36" ,
+          "updatedAt": "2021-11-19 20:39:36",
           "User": {
             "id": 1,
             "firstName": "John",
@@ -706,17 +743,18 @@ Returns all the reviews that belong to a spot specified by id.
               "id": 1,
               "url": "image url"
             }
-          ],
+          ]
         }
       ]
     }
     ```
 
-* Error response: Couldn't find a Spot with the specified id
-  * Status Code: 404
-  * Headers:
-    * Content-Type: application/json
-  * Body:
+- Error response: Couldn't find a Spot with the specified id
+
+  - Status Code: 404
+  - Headers:
+    - Content-Type: application/json
+  - Body:
 
     ```json
     {

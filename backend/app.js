@@ -1,14 +1,49 @@
-const express = require('express')
-const port = process.env.PORT||3000;
-const app = express()
+// Imports
+const express = require("express");
+require("express-async-errors");
+const morgan = require("morgan");
+const cors = require("cors");
+const csurf = require("csurf");
+const helmet = require("helmet");
+const cookieParser = require("cookie-parser");
+const routes = require("./routes");
+
+// check the current environment
+const { environment } = require("./config");
+const isProduction = environment === "production";
+
+const app = express();
+
+// middleware
+app.use(morgan("dev"));
+app.use(cookieParser());
 app.use(express.json());
 
-const apiRoutes = require('./routes/api')
- app.get("/", (req,res,next)=>{
-    res.send("api working")
- })
-app.use('/api', apiRoutes)
+// Security Middleware
+if (!isProduction) {
+  // enable cors only in development
+  app.use(cors());
+}
 
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-  });
+// helmet helps set a variety of headers to better secure your app
+app.use(
+  helmet.crossOriginResourcePolicy({
+    policy: "cross-origin",
+  })
+);
+
+// Set the _csrf token and create req.csrfToken method
+app.use(
+  csurf({
+    cookie: {
+      secure: isProduction,
+      sameSite: isProduction && "Lax",
+      httpOnly: true,
+    },
+  })
+);
+
+// use all routes after middleware has been created
+app.use(routes);
+
+module.exports = app;
