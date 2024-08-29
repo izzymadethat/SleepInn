@@ -25,17 +25,36 @@ module.exports = (sequelize, DataTypes) => {
         key:"id"
       }
     },
-    address: DataTypes.STRING,
-    city: DataTypes.STRING,
-    state: DataTypes.STRING,
-    country: DataTypes.STRING,
+    address:{
+      type:DataTypes.STRING,
+      allowNull: false
+    },
+    city: {
+      type:DataTypes.STRING,
+      allowNull: false
+    },
+    state:{
+      type:DataTypes.STRING,
+      allowNull: false
+    },
+    country: {
+      type:DataTypes.STRING,
+      allowNull: false
+    },
     lat: DataTypes.FLOAT,
     lng: DataTypes.FLOAT,
-    name: DataTypes.STRING,
+    name: {
+      type:DataTypes.STRING,
+      allowNull: false
+    },
     description: DataTypes.STRING,
-    price: DataTypes.FLOAT,
+    price: {
+      type:DataTypes.FLOAT,
+      allowNull: false
+    },
     averageRating: DataTypes.FLOAT,
-    previewImg: DataTypes.STRING
+    previewImg:DataTypes.STRING
+     ,
   }, {
     sequelize,
     modelName: 'Spot',

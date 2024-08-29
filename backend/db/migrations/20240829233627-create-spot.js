@@ -19,15 +19,19 @@ module.exports = {
       },
       address: {
         type: Sequelize.STRING,
+        allowNull:false
       },
       city: {
         type: Sequelize.STRING,
+        allowNull:false
       },
       state: {
         type: Sequelize.STRING,
+        allowNull:false
       },
       country: {
         type: Sequelize.STRING,
+        allowNull:false
       },
       lat: {
         type: Sequelize.FLOAT,
@@ -37,12 +41,14 @@ module.exports = {
       },
       name: {
         type: Sequelize.STRING,
+        allowNull:false
       },
       description: {
         type: Sequelize.STRING,
       },
       price: {
         type: Sequelize.FLOAT,
+        allowNull:false
       },
       averageRating: {
         type: Sequelize.FLOAT,
@@ -52,11 +58,11 @@ module.exports = {
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: Sequelize.literal("CURRENT_TIMESTAMP"),
       },
     });
   },
