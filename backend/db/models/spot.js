@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Spot extends Model {
     /**
@@ -11,41 +9,55 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Spot.belongsTo(models.User),{
-        foreignKey:"ownerId"
-      }
+      Spot.belongsTo(models.User, {
+        foreignKey: "ownerId",
+      });
     }
   }
-  Spot.init({
-    id:{
-      type:DataTypes.INTEGER,
-       autoIncrement:true,
-       primaryKey:true
+  Spot.init(
+    {
+      ownerId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Users",
+          key: "id",
+        },
+      },
+      address: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      city: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      state: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      country: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      lat: DataTypes.FLOAT,
+      lng: DataTypes.FLOAT,
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      description: DataTypes.STRING,
+      price: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+      },
+      averageRating: DataTypes.FLOAT,
+      previewImg: DataTypes.STRING,
     },
-    ownerId:{
-      type:DataTypes.INTEGER,
-      allowNull:false,
-      references:{
-        model:"Users",
-        key:"id"
-      }
-    },
-    address: DataTypes.STRING,
-    city: DataTypes.STRING,
-    state: DataTypes.STRING,
-    country: DataTypes.STRING,
-    lat: DataTypes.FLOAT,
-    lng: DataTypes.FLOAT,
-    name: DataTypes.STRING,
-    description: DataTypes.STRING,
-    price: DataTypes.FLOAT,
-    averageRating: DataTypes.FLOAT,
-    previewImg: DataTypes.STRING,
-    createdAt: DataTypes.DATE,
-    updatedAt: DataTypes.DATE
-  }, {
-    sequelize,
-    modelName: 'Spot',
-  });
+    {
+      sequelize,
+      modelName: "Spot",
+    }
+  );
   return Spot;
 };
