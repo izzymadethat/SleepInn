@@ -289,7 +289,7 @@ Returns all the spots owned (created) by the current user.
 - Request
 
   - Method: get
-  - Route path: /api/spots/:ownerId
+  - Route path: /api/spots/owner/:ownerId
   - Body: none
 
 - Successful Response
