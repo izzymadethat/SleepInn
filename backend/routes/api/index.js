@@ -9,7 +9,7 @@ const spotsRouter = require("./spots.js");
 router.use(restoreUser);
 
 router.use("/session", sessionRouter);
-// router.use("/spots", spotsRouter);
+router.use("/spots", spotsRouter);
 
 router.use("/users", usersRouter);
 
