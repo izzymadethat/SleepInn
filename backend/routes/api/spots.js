@@ -18,7 +18,8 @@ router.get('/:spotId', async(req,res, next) =>{
       include: [{
         model: User,
         where: { id: Sequelize.col('Spot.ownerId') },// Match User's id to Spot's ownerId
-        attributes: ['id', 'firstName', 'lastName']
+        attributes: ['id', 'firstName', 'lastName'],
+        as:"Owner"
       }]
     });
    if (!spot) {
