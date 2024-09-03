@@ -43,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
       stars: {
         type: DataTypes.FLOAT,
         allowNull: false,
-        defaultValue: 0,
+        defaultValue: 1,
         validate: {
           min: 1,
           max: 5,

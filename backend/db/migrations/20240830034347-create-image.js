@@ -25,7 +25,6 @@ module.exports = {
             model: "Spots",
             key: "id",
           },
-          onDelete: "CASCADE",
         },
         reviewId: {
           type: Sequelize.INTEGER,
@@ -33,7 +32,6 @@ module.exports = {
             model: "Reviews",
             key: "id",
           },
-          onDelete: "CASCADE",
         },
         createdAt: {
           allowNull: false,
