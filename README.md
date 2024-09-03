@@ -484,7 +484,7 @@ Create and return a new image for a spot specified by id.
     ```json
     {
       "url": "image url",
-      "preview": true/spots/:spotId
+      "preview": true
     }
     ```
 
@@ -653,8 +653,8 @@ Returns all the reviews written by the current user.
 - Require Authentication: true
 - Request
 
-  - Method: get
-  - Route path: /api/users/currentUser/reviews
+  - Method: Get
+  - Route path: /api/reviews/:userId
   - Body: none
 
 - Successful Response
@@ -711,8 +711,8 @@ Returns all the reviews that belong to a spot specified by id.
 - Require Authentication: false
 - Request
 
-  - Method:get
-  - Route path: /api/spots/:spotId/reviews
+  - Method: Get
+  - Route path: /api/reviews/:spotId
   - Body: none
 
 - Successful Response
@@ -770,7 +770,7 @@ Create and return a new review for a spot specified by id.
 - Request
 
   - Method: POST
-  - Route path: /api/spots/:spotId/reviews
+  - Route path: /api/reviews/:spotId
   - Headers:
     - Content-Type: application/json
   - Body:
