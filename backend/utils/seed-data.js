@@ -127,7 +127,7 @@ const bookingSeed = [
     bookingDate: new Date("2024-10-31"),
   },
 ];
-const spotImages = [
+const imagesSeed = [
   {
     userId: 1,
     url: "https://placehold.co/600x400/png",
@@ -153,8 +153,6 @@ const spotImages = [
     url: "https://placehold.co/600x400/png",
     spotId: 5,
   },
-];
-const reviewImages = [
   {
     userId: 2,
     url: "https://placehold.co/600x400/png",
@@ -172,6 +170,5 @@ module.exports = {
   spotSeed,
   reviewSeed,
   bookingSeed,
-  spotImages,
-  reviewImages,
+  imagesSeed,
 };

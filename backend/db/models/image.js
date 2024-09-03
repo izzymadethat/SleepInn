@@ -4,10 +4,8 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Image extends Model {
     static associate(models) {
-      Image.belongsToMany(models.Review, {
-        through: "ReviewImages",
-        foreignKey: "imageId",
-        otherKey: "reviewId",
+      Image.belongsTo(models.Review, {
+        foreignKey: "reviewId",
       });
 
       Image.belongsTo(models.Spot, {
@@ -18,13 +16,7 @@ module.exports = (sequelize, DataTypes) => {
 
       Image.belongsTo(models.User, {
         foreignKey: "ownerId",
-      });
-
-      // If `reviewId` is not used in the join table, ensure its association here
-      Image.belongsTo(models.Review, {
-        foreignKey: "reviewId",
-        allowNull: true,
-        onDelete: "CASCADE",
+        allowNull: true, // Allow null if not every image has an owner
       });
     }
   }
@@ -73,6 +65,14 @@ module.exports = (sequelize, DataTypes) => {
           if (!this.spotId && !this.reviewId) {
             throw new Error(
               "An image must be associated with either a spot or a review."
+            );
+          }
+        },
+
+        handleSpotAndReview() {
+          if (this.spotId && this.reviewId) {
+            throw new Error(
+              "An image cannot be associated with both a spot and a review."
             );
           }
         },
