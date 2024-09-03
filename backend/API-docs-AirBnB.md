@@ -289,7 +289,7 @@ Returns all the spots owned (created) by the current user.
 - Request
 
   - Method: get
-  - Route path: /api/spots/owner/:ownerId
+  - Route path: /api/spots/:ownerId
   - Body: none
 
 - Successful Response
@@ -484,7 +484,7 @@ Create and return a new image for a spot specified by id.
     ```json
     {
       "url": "image url",
-      "preview": true/spots/:spotId
+      "preview": true
     }
     ```
 

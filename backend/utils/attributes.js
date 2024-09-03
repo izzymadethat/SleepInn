@@ -17,6 +17,6 @@ exports.spotAttributes = [
   "price",
 ];
 
-exports.reviewImageAttributes = ["id", "url"];
+exports.imageAttributes = ["id", "url"];
 
 exports.userAttributes = ["id", "username", "email"];

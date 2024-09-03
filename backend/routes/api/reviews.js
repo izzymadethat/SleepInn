@@ -159,7 +159,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
   try {
     // check if review exists
     const existingReview = await Review.findByPk(reviewId, {
-      include: [{ model: Image }],
+      include: [reviewImageAttributes],
     });
 
     // send 404 if review doesn't exist
