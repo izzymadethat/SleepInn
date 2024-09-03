@@ -1,12 +1,8 @@
 "use strict";
 const { Model } = require("sequelize");
+
 module.exports = (sequelize, DataTypes) => {
   class Image extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate(models) {
       Image.belongsToMany(models.Review, {
         through: "ReviewImages",
@@ -16,13 +12,23 @@ module.exports = (sequelize, DataTypes) => {
 
       Image.belongsTo(models.Spot, {
         foreignKey: "spotId",
+        allowNull: true,
+        onDelete: "CASCADE",
       });
 
       Image.belongsTo(models.User, {
         foreignKey: "ownerId",
       });
+
+      // If `reviewId` is not used in the join table, ensure its association here
+      Image.belongsTo(models.Review, {
+        foreignKey: "reviewId",
+        allowNull: true,
+        onDelete: "CASCADE",
+      });
     }
   }
+
   Image.init(
     {
       url: {
@@ -34,6 +40,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       spotId: {
         type: DataTypes.INTEGER,
+        allowNull: true,
         references: {
           model: "Spots",
           key: "id",
@@ -42,8 +49,17 @@ module.exports = (sequelize, DataTypes) => {
       },
       reviewId: {
         type: DataTypes.INTEGER,
+        allowNull: true,
         references: {
           model: "Reviews",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+      },
+      userId: {
+        type: DataTypes.INTEGER,
+        references: {
+          model: "Users",
           key: "id",
         },
         onDelete: "CASCADE",
@@ -52,7 +68,17 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Image",
+      validate: {
+        eitherSpotOrReview() {
+          if (!this.spotId && !this.reviewId) {
+            throw new Error(
+              "An image must be associated with either a spot or a review."
+            );
+          }
+        },
+      },
     }
   );
+
   return Image;
 };
