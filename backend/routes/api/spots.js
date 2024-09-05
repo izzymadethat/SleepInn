@@ -39,35 +39,12 @@ const {
     Everything else goes in between.
 */
 const validateBooking = [
-  check("SpotId")
+  check("startDate")
     .exists({ checkFalsy: true })
-    .withMessage("Bad request"), // 400
-  check("city").exists({ checkFalsy: true }).withMessage("City is required"), // 400
-  check("state").exists({ checkFalsy: true }).withMessage("State is required"), // 400
-  check("country")
-    .exists({ checkFalsy: true })
-    .withMessage("Country is required"), // 400
-  check("lat")
-    .exists({ checkFalsy: true })
-    .isDecimal({ min: -90, max: 90 })
-    .withMessage("Latitude must be within -90 and 90"),
-  check("lng")
-    .exists({ checkFalsy: true })
-    .isDecimal({ min: -180, max: 180 })
-    .withMessage("Longitude must be within -180 and 180"),
-  check("name")
-    .exists({ checkFalsy: true })
-    .isLength({ max: 50 })
-    .withMessage("Name must be less than 50 characters"),
-  check("description")
-    .exists({ checkFalsy: true })
-    .withMessage("Description is required"),
-  check("price")
-    .exists({ checkFalsy: true })
-    .isDecimal({ min: 0 })
-    .withMessage("Price per day must be a positive number"),
+    .withMessage("startDate cannot be in the past"), // 400
   handleValidationErrors,
 ];
+
 const validateSpot = [
   check("address")
     .exists({ checkFalsy: true })
@@ -231,15 +208,18 @@ router.post("/:spotId/images", requireAuth, async (req, res) => {
   }
 });
 // create booking from spot id
-router.post("/:spotId/bookings", requireAuth, async (req, res, next) => {
+router.post("/:spotId/bookings", requireAuth, validateBooking, async (req, res, next) => {
   const userId = req.user.id;
   const { startDate, endDate } = req.body;
   const spotId = Number(req.params.spotId);
-
+  // const today = new Date.now()
+  // const now = today.now()
   try {
 
     const booking = await Booking.create({spotId,userId,startDate,endDate})
     const spot = await Spot.findByPk(spotId)
+    const newStartDate = new Date(startDate).toISOString().slice(0,10)
+    const newendDate = new Date(endDate).toISOString().slice(0,10)
     if(userId === spot.OwnerId){
       throw new Error('Spot must not belong to user')
     }
@@ -248,6 +228,18 @@ router.post("/:spotId/bookings", requireAuth, async (req, res, next) => {
       err.status = 404;
       next(err);
     }
+    // if(now < startDate){
+    //   const err = new Error("startDate cant be the past");
+    //   err.status = 400
+    //   next(err)
+    // }
+
+    // if(endDate <= startDate){
+    //   const err = new Error("endDate cant be on or before startDate");
+    //   err.status = 400
+    //   next(err)
+    // }
+
   ;
 // need help with .check for body validation errors
     res.status(201).json(booking);
