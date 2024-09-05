@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { Spot } = require("../../db/models");
-const { User } = require("../../db/models");
+const { Spot, User, Booking } = require("../../db/models");
+
 const { requireAuth } = require("../../utils/auth");
 const Sequelize = require("sequelize");
 const { check } = require("express-validator");
@@ -26,7 +26,7 @@ const {
 //   },
 // };
 
-/* 
+/*
   Quick note:
     I modified the routes we discussed. I made some note of changes. The overall change you should see is that the spots routes are laid out in a way that streamlines the code. Express isn't strict with layout, therefore it can be very hard to keep track of where routes are. I did it to where you start with getting all spots then by then end there's a route to delete a spot. This is my typical layout:
 
@@ -38,7 +38,36 @@ const {
 
     Everything else goes in between.
 */
-
+const validateBooking = [
+  check("SpotId")
+    .exists({ checkFalsy: true })
+    .withMessage("Bad request"), // 400
+  check("city").exists({ checkFalsy: true }).withMessage("City is required"), // 400
+  check("state").exists({ checkFalsy: true }).withMessage("State is required"), // 400
+  check("country")
+    .exists({ checkFalsy: true })
+    .withMessage("Country is required"), // 400
+  check("lat")
+    .exists({ checkFalsy: true })
+    .isDecimal({ min: -90, max: 90 })
+    .withMessage("Latitude must be within -90 and 90"),
+  check("lng")
+    .exists({ checkFalsy: true })
+    .isDecimal({ min: -180, max: 180 })
+    .withMessage("Longitude must be within -180 and 180"),
+  check("name")
+    .exists({ checkFalsy: true })
+    .isLength({ max: 50 })
+    .withMessage("Name must be less than 50 characters"),
+  check("description")
+    .exists({ checkFalsy: true })
+    .withMessage("Description is required"),
+  check("price")
+    .exists({ checkFalsy: true })
+    .isDecimal({ min: 0 })
+    .withMessage("Price per day must be a positive number"),
+  handleValidationErrors,
+];
 const validateSpot = [
   check("address")
     .exists({ checkFalsy: true })
@@ -201,6 +230,32 @@ router.post("/:spotId/images", requireAuth, async (req, res) => {
     next(e);
   }
 });
+// create booking from spot id
+router.post("/:spotId/bookings", requireAuth, async (req, res, next) => {
+  const userId = req.user.id;
+  const { startDate, endDate } = req.body;
+  const spotId = Number(req.params.spotId);
+
+  try {
+
+    const booking = await Booking.create({spotId,userId,startDate,endDate})
+    const spot = await Spot.findByPk(spotId)
+    if(userId === spot.OwnerId){
+      throw new Error('Spot must not belong to user')
+    }
+    if (!spot) {
+      const err = new Error("Spot couldn't be found");
+      err.status = 404;
+      next(err);
+    }
+  ;
+// need help with .check for body validation errors
+    res.status(201).json(booking);
+  } catch (e) {
+    e.status = 500;
+    next(e);
+  }
+});
 
 // edit a spot by spot id
 router.put("/:spotId", requireAuth, validateSpot, async (req, res) => {
@@ -263,4 +318,6 @@ router.delete("/:spotId", requireAuth, async (req, res) => {
   }
 });
 
+
+// create booking from spot id
 module.exports = router;

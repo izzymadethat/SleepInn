@@ -31,9 +31,13 @@ module.exports = {
             key: "id",
           },
         },
-        bookingDate: {
+        startDate:{
           type: Sequelize.DATE,
-          allowNull: false,
+          allowNull:false
+        },
+        endDate:{
+          type: Sequelize.DATE,
+          allowNull:false
         },
         createdAt: {
           allowNull: false,

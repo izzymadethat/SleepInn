@@ -26,10 +26,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      bookingDate: {
+      startDate:{
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull:false
       },
+      endDate:{
+        type: DataTypes.DATE,
+        allowNull:false
+      }
     },
     {
       sequelize,

@@ -114,17 +114,20 @@ const bookingSeed = [
   {
     spotId: 1,
     userId: 1,
-    bookingDate: new Date("2024-09-15"),
+    startDate: new Date("2024-09-15"),
+    endDate: new Date("2024-09-16")
   },
   {
     spotId: 2,
     userId: 1,
-    bookingDate: new Date("2024-09-24"),
+    startDate: new Date("2024-09-24"),
+    endDate: new Date("2024-09-25")
   },
   {
     spotId: 5,
     userId: 3,
-    bookingDate: new Date("2024-10-31"),
+    startDate: new Date("2024-10-31"),
+    endDate: new Date("2024-11-01")
   },
 ];
 const imageSeed = [
