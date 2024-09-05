@@ -1,12 +1,12 @@
 "use strict";
-const { Review } = require("../../db/models");
-const { reviewSeed } = require("../../utils/seed-data");
+const { ReviewImage } = require("../models");
+const { reviewImageSeed } = require("../../utils/seed-data");
 
-/** @type {import('sequelize-cli').Migration} */
 const options = {};
 if (process.env.NODE_ENV === "production") {
   options.schema = process.env.SCHEMA;
 }
+/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     /**
@@ -18,7 +18,7 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
      */
-    await Review.bulkCreate(reviewSeed, { validate: true });
+    await ReviewImage.bulkCreate(reviewImageSeed, { validate: true });
   },
 
   async down(queryInterface, Sequelize) {
@@ -28,7 +28,7 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-    options.tableName = "Reviews";
+    options.tableName = "ReviewImages";
     await queryInterface.bulkDelete(options, null, {});
   },
 };

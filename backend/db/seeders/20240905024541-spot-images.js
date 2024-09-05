@@ -1,12 +1,12 @@
 "use strict";
-const { Booking } = require("../models");
-const { bookingSeed } = require("../../utils/seed-data");
+const { SpotImage } = require("../models");
+const { spotImageSeed } = require("../../utils/seed-data");
 
-/** @type {import('sequelize-cli').Migration} */
 const options = {};
 if (process.env.NODE_ENV === "production") {
   options.schema = process.env.SCHEMA;
 }
+/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     /**
@@ -18,7 +18,7 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
      */
-    await Booking.bulkCreate(bookingSeed, { validate: true });
+    await SpotImage.bulkCreate(spotImageSeed, { validate: true });
   },
 
   async down(queryInterface, Sequelize) {
@@ -28,7 +28,7 @@ module.exports = {
      * Example:
      * await queryInterface.bulkDelete('People', null, {});
      */
-    options.tableName = "Bookings";
+    options.tableName = "SpotImages";
     await queryInterface.bulkDelete(options, null, {});
   },
 };

@@ -1,15 +1,13 @@
 "use strict";
-
 const { Spot } = require("../models");
 const { spotSeed } = require("../../utils/seed-data");
 
-/** @type {import('sequelize-cli').Migration} */
 const options = {};
-
 if (process.env.NODE_ENV === "production") {
-  options.schema = process.env.SCHEMA; // define your schema in options object
+  options.schema = process.env.SCHEMA;
 }
 
+/** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     /**
@@ -34,14 +32,10 @@ module.exports = {
     options.tableName = "Spots";
     const Op = Sequelize.Op;
     const addresses = spotSeed.map((spot) => spot.address);
-    return await queryInterface.bulkDelete(
-      "Spots",
-      {
-        address: {
-          [Op.in]: addresses,
-        },
+    await queryInterface.bulkDelete(options, {
+      name: {
+        [Op.in]: addresses,
       },
-      {}
-    );
+    });
   },
 };

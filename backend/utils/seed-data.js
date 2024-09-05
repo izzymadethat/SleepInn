@@ -127,35 +127,32 @@ const bookingSeed = [
     bookingDate: new Date("2024-10-31"),
   },
 ];
-const spotImageSeed = [
+const imageSeed = [
   {
     userId: 1,
     url: "https://placehold.co/600x400/png",
     spotId: 1,
   },
   {
-    userId: 2,
+    userId: 1,
     url: "https://placehold.co/600x400/png",
     spotId: 2,
   },
   {
-    userId: 3,
+    userId: 1,
     url: "https://placehold.co/600x400/png",
     spotId: 3,
   },
   {
-    userId: 4,
+    userId: 3,
     url: "https://placehold.co/600x400/png",
     spotId: 4,
   },
   {
-    userId: 5,
+    userId: 3,
     url: "https://placehold.co/600x400/png",
     spotId: 5,
   },
-
-];
-const reviewImageSeed = [
   {
     userId: 2,
     url: "https://placehold.co/600x400/png",
@@ -165,14 +162,56 @@ const reviewImageSeed = [
     userId: 1,
     url: "https://placehold.co/600x400/png",
     reviewId: 2,
-  }
- ]
+  },
+  {
+    userId: 3,
+    url: "https://placehold.co/600x400/png",
+    reviewId: 3,
+  },
+];
+const spotImageSeed = [
+  {
+    imageId: 1,
+    spotId: 1,
+  },
+  {
+    imageId: 2,
+    spotId: 2,
+  },
+  {
+    imageId: 3,
+    spotId: 3,
+  },
+  {
+    imageId: 4,
+    spotId: 4,
+  },
+  {
+    imageId: 5,
+    spotId: 5,
+  },
+];
+const reviewImageSeed = [
+  {
+    imageId: 6,
+    reviewId: 1,
+  },
+  {
+    imageId: 7,
+    reviewId: 2,
+  },
+  {
+    imageId: 8,
+    reviewId: 3,
+  },
+];
 
 module.exports = {
   userSeed,
   spotSeed,
   reviewSeed,
   bookingSeed,
+  imageSeed,
   spotImageSeed,
-  reviewImageSeed
+  reviewImageSeed,
 };

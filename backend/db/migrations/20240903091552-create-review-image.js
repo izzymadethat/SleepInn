@@ -15,23 +15,16 @@ module.exports = {
         references: {
           model: "Images",
           key: "id",
-        }
+        },
       },
-      userId: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "Users",
-          key: "id",
-        }
-      },
+
       reviewId: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
           model: "Reviews",
           key: "id",
-        }
+        },
       },
       createdAt: {
         allowNull: false,

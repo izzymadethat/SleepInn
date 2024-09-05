@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model
-} = require('sequelize');
+"use strict";
+const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class SpotImage extends Model {
     /**
@@ -13,35 +11,30 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
     }
   }
-  SpotImage.init({
-    spotId: {
-      type: Sequelize.INTEGER,
-      allowNull:false,
-      references: {
-        model: "Spots",
-        key: "id",
+  SpotImage.init(
+    {
+      spotId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Spots",
+          key: "id",
+        },
+        onDelete: "CASCADE",
       },
-      onDelete:"CASCADE"
+      imageId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Images",
+          key: "id",
+        },
+      },
     },
-    imageId: {
-      type: Sequelize.INTEGER,
-      allowNull:false,
-      references: {
-        model: "Images",
-        key: "id",
-      }
-    },
-    userId: {
-      type: Sequelize.INTEGER,
-      allowNull:false,
-      references: {
-        model: "Users",
-        key: "id",
-      }
-    },
-  }, {
-    sequelize,
-    modelName: 'SpotImage',
-  });
+    {
+      sequelize,
+      modelName: "SpotImage",
+    }
+  );
   return SpotImage;
 };
