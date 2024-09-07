@@ -1,4 +1,7 @@
 "use strict";
+
+const { options } = require("../../routes");
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -40,6 +43,7 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("SpotImages");
+    options.tableName = "SpotImages";
+    await queryInterface.dropTable(options);
   },
 };

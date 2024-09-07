@@ -26,8 +26,8 @@ const validateReview = [
   Get all the reviews of the current user
 ========================================
 */
-router.get("/:userId", requireAuth, async (req, res, next) => {
-  const uid = req.params.id;
+router.get("/current", requireAuth, async (req, res, next) => {
+  const uid = req.user.id;
 
   try {
     const reviews = await Review.findAll({
@@ -59,7 +59,6 @@ router.get("/:userId", requireAuth, async (req, res, next) => {
 
     res.json({ Reviews: reviews });
   } catch (error) {
-    error.status = 500;
     next(error);
   }
 });
@@ -91,7 +90,9 @@ router.get("/:spotId", async (req, res, next) => {
       ],
     });
 
-    if (!reviews) {
+    // I'm not entirely checking for the reviews length to be 0 because if there are no reviews it will return an empty array.
+    // I'm checking if it even returns a length because if there are no reviews because there's no spot it will return null
+    if (!reviews.length) {
       const err = new Error("Spot couldn't be found");
       err.status = 404;
       return next(err);
@@ -110,10 +111,11 @@ router.get("/:spotId", async (req, res, next) => {
 */
 router.post("/:spotId", requireAuth, validateReview, async (req, res, next) => {
   const spotId = req.params.spotId;
+  const uid = req.user.id;
   const { review, stars } = req.body;
 
   const reviewObj = {
-    userId: req.user.id,
+    userId: uid,
     spotId,
     review,
     stars,
@@ -123,7 +125,7 @@ router.post("/:spotId", requireAuth, validateReview, async (req, res, next) => {
     const existingSpot = await Spot.findByPk(spotId);
     const existingReview = await Review.findOne({
       where: {
-        userId: req.user.id,
+        userId: uid,
         spotId,
       },
     });
@@ -154,6 +156,7 @@ router.post("/:spotId", requireAuth, validateReview, async (req, res, next) => {
 */
 router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
   const reviewId = req.params.reviewId;
+  const uid = req.user.id;
   const { url } = req.body;
 
   try {
@@ -170,7 +173,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
     }
 
     //   check if review belongs to user
-    if (existingReview.userId !== req.user.id) {
+    if (existingReview.userId !== uid) {
       const err = new Error("Forbidden");
       err.status = 403;
       return next(err);
@@ -194,8 +197,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
       url: newImage.url,
     });
   } catch (error) {
-    res.status(500);
-    return next(error);
+    next(error);
   }
 });
 
@@ -210,6 +212,7 @@ router.put(
   validateReview,
   async (req, res, next) => {
     const reviewId = req.params.reviewId;
+    const uid = req.user.id;
     const { review, stars } = req.body;
 
     try {
@@ -223,7 +226,7 @@ router.put(
       }
 
       // check if review belongs to user
-      if (existingReview.userId !== req.user.id) {
+      if (existingReview.userId !== uid) {
         const err = new Error("Forbidden");
         err.status = 403;
         return next(err);
@@ -251,6 +254,7 @@ router.put(
 */
 router.delete("/:reviewId", requireAuth, async (req, res, next) => {
   const reviewId = req.params.reviewId;
+  const uid = req.user.id;
   try {
     const existingReview = await Review.findByPk(reviewId);
     // check if review exists
@@ -261,7 +265,7 @@ router.delete("/:reviewId", requireAuth, async (req, res, next) => {
     }
 
     // check if review belongs to user
-    if (existingReview.userId !== req.user.id) {
+    if (existingReview.userId !== uid) {
       const err = new Error("Forbidden");
       err.status = 403;
       return next(err);
@@ -286,6 +290,7 @@ router.delete(
   requireAuth,
   async (req, res, next) => {
     const { reviewId, imageId } = req.params;
+    const uid = req.user.id;
 
     try {
       const existingReview = await Review.findByPk(reviewId, {
@@ -300,7 +305,7 @@ router.delete(
       }
 
       // check if review belongs to user
-      if (existingReview.userId !== req.user.id) {
+      if (existingReview.userId !== uid) {
         const err = new Error("Forbidden");
         err.status = 403;
         return next(err);

@@ -26,9 +26,15 @@ module.exports = (sequelize, DataTypes) => {
   }
   Image.init(
     {
-      url: DataTypes.STRING,
+      url: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       spotId: DataTypes.INTEGER,
-      userId: DataTypes.INTEGER,
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
       reviewId: DataTypes.INTEGER,
     },
     {

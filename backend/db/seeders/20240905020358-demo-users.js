@@ -19,11 +19,8 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
      */
-    try {
-      await User.bulkCreate(userSeed, { validate: true });
-    } catch (error) {
-      console.error(error);
-    }
+
+    await User.bulkCreate(userSeed, { validate: true });
   },
 
   async down(queryInterface, Sequelize) {

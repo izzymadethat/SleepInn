@@ -80,10 +80,9 @@ const validateSpot = [
 router.get("/", async (req, res) => {
   try {
     const allSpots = await Spot.findAll();
-    res.json(allSpots);
+    res.json({ spots: allSpots });
   } catch (e) {
-    console.error(e);
-    res.status(500).send("Internal Server Error");
+    next(e);
   }
 });
 
@@ -95,35 +94,17 @@ router.get("/:ownerId", requireAuth, async (req, res, next) => {
       where: { ownerId },
     });
 
-    res.json(allSpots);
+    res.json({ spots: allSpots });
   } catch (e) {
-    res.status(500);
-    console.error(e);
     next(e);
   }
 });
 
-//get spot by spot id
-// I went back through the routes I don't see any conflicting routes?
-// I can see how this got you confused on the routing
-// You're still gonna use /api/spots/:spotId
+// get a single spot
 router.get("/:spotId", async (req, res, next) => {
   const spotId = Number(req.params.spotId);
 
   try {
-    // const spot = await Spot.findOne({
-    //   where: { id: spotId },
-    //   include: [
-    //     {
-    //       model: User,
-    //       where: { id: Sequelize.col("Spot.ownerId") }, // Match User's id to Spot's ownerId
-    //       attributes: ["id", "firstName", "lastName"],
-    //       as: "Owner",
-    //     },
-    //   ],
-    // });
-
-    // Here's a quick way you could write this
     const spot = await Spot.findByPk(spotId, {
       include: [
         {
@@ -140,14 +121,56 @@ router.get("/:spotId", async (req, res, next) => {
     });
     if (!spot) {
       //spot not found
-      return res.status(404).json({ message: "Spot couldn't be found" });
+      const err = new Error("Spot couldn't be found");
+      err.status = 404;
+      return next(err);
     }
 
     res.json(spot);
   } catch (e) {
-    res.status(500);
-    console.error(e);
     next(e);
+  }
+});
+
+// get all bookings for a spot based on spot id
+router.get("/:spotId/bookings", async (req, res, next) => {
+  const spotId = Number(req.params.spotId);
+  const uid = req.user.id;
+
+  try {
+    const spot = await Spot.findByPk(spotId);
+    if (!spot) {
+      const err = new Error("Spot couldn't be found");
+      err.status = 404;
+      return next(err);
+    }
+
+    let bookings;
+
+    // if the user is the owner of the spot, include all details
+    if (spot.ownerId === uid) {
+      bookings = await Booking.findAll({
+        where: { spotId },
+        include: [
+          {
+            model: User,
+            attributes: userAttributes, // only has id, firstName, lastName
+            as: "User",
+          },
+        ],
+      });
+
+      return res.json({ Bookings: bookings });
+    }
+
+    // if the user is not the owner of the spot, only include basic details
+    bookings = await Booking.findAll({
+      where: { spotId },
+      attributes: ["spotId", "startDate", "endDate"],
+    });
+    return res.json({ Bookings: bookings });
+  } catch (error) {
+    next(error);
   }
 });
 
@@ -170,12 +193,42 @@ router.post("/", requireAuth, validateSpot, async (req, res) => {
       price,
     });
     if (!spot) {
-      return res.status(400).json(errorMessage);
+      const err = new Error("Spot couldn't be created");
+      err.status = 404;
+      return next(err);
     }
-    res.status(201).json(spot);
+    res.status(201).json({ spot });
   } catch (e) {
-    console.error(e);
-    res.status(500).send("Internal Server Error");
+    next(e);
+  }
+});
+
+// create a booking from a spot based on spot id
+router.post("/:spotId/bookings", requireAuth, async (req, res) => {
+  const ownerId = req.user.id;
+  const { startDate, endDate } = req.body;
+  const spotId = Number(req.params.spotId);
+  try {
+    const spot = await Spot.findByPk(spotId);
+    if (!spot) {
+      const err = new Error("Spot couldn't be found");
+      err.status = 404;
+      next(err);
+    }
+    if (spot.ownerId === ownerId) {
+      const err = new Error("Forbidden");
+      err.status = 403;
+      next(err);
+    }
+    const booking = await Booking.create({
+      spotId,
+      userId: ownerId,
+      startDate,
+      endDate,
+    });
+    res.status(201).json(booking);
+  } catch (e) {
+    next(e);
   }
 });
 
@@ -203,51 +256,107 @@ router.post("/:spotId/images", requireAuth, async (req, res) => {
     });
     res.status(201).json(newImage);
   } catch (e) {
-    e.status = 500;
     next(e);
   }
 });
 // create booking from spot id
-router.post("/:spotId/bookings", requireAuth, validateBooking, async (req, res, next) => {
-  const userId = req.user.id;
-  const { startDate, endDate } = req.body;
-  const spotId = Number(req.params.spotId);
-  // const today = new Date.now()
-  // const now = today.now()
-  try {
+router.post(
+  "/:spotId/bookings",
+  requireAuth,
+  validateBooking,
+  async (req, res, next) => {
+    const userId = req.user.id;
+    const { startDate, endDate } = req.body;
+    const spotId = Number(req.params.spotId);
+    // const today = new Date.now()
+    // const now = today.now()
+    try {
+      const booking = await Booking.create({
+        spotId,
+        userId,
+        startDate,
+        endDate,
+      });
+      const spot = await Spot.findByPk(spotId);
+      const newStartDate = new Date(startDate).toISOString().slice(0, 10);
+      const newendDate = new Date(endDate).toISOString().slice(0, 10);
+      if (userId === spot.OwnerId) {
+        throw new Error("Spot must not belong to user");
+      }
+      if (!spot) {
+        const err = new Error("Spot couldn't be found");
+        err.status = 404;
+        next(err);
+      }
+      // if(now < startDate){
+      //   const err = new Error("startDate cant be the past");
+      //   err.status = 400
+      //   next(err)
+      // }
 
-    const booking = await Booking.create({spotId,userId,startDate,endDate})
-    const spot = await Spot.findByPk(spotId)
-    const newStartDate = new Date(startDate).toISOString().slice(0,10)
-    const newendDate = new Date(endDate).toISOString().slice(0,10)
-    if(userId === spot.OwnerId){
-      throw new Error('Spot must not belong to user')
+      // if(endDate <= startDate){
+      //   const err = new Error("endDate cant be on or before startDate");
+      //   err.status = 400
+      //   next(err)
+      // }
+
+      // need help with .check for body validation errors
+      res.status(201).json(booking);
+    } catch (e) {
+      e.status = 500;
+      next(e);
     }
-    if (!spot) {
-      const err = new Error("Spot couldn't be found");
-      err.status = 404;
-      next(err);
-    }
-    // if(now < startDate){
-    //   const err = new Error("startDate cant be the past");
-    //   err.status = 400
-    //   next(err)
-    // }
-
-    // if(endDate <= startDate){
-    //   const err = new Error("endDate cant be on or before startDate");
-    //   err.status = 400
-    //   next(err)
-    // }
-
-  ;
-// need help with .check for body validation errors
-    res.status(201).json(booking);
-  } catch (e) {
-    e.status = 500;
-    next(e);
   }
-});
+);
+// create booking from spot id
+router.post(
+  "/:spotId/bookings",
+  requireAuth,
+  validateBooking,
+  async (req, res, next) => {
+    const userId = req.user.id;
+    const { startDate, endDate } = req.body;
+    const spotId = Number(req.params.spotId);
+    // const today = new Date.now()
+    // const now = today.now()
+    try {
+      const booking = await Booking.create({
+        spotId,
+        userId,
+        startDate,
+        endDate,
+      });
+      const spot = await Spot.findByPk(spotId);
+      const newStartDate = new Date(startDate).toISOString().slice(0, 10);
+      const newendDate = new Date(endDate).toISOString().slice(0, 10);
+      if (userId === spot.OwnerId) {
+        throw new Error("Spot must not belong to user");
+      }
+      if (!spot) {
+        const err = new Error("Spot couldn't be found");
+        err.status = 404;
+        next(err);
+      }
+      // if(now < startDate){
+      //   const err = new Error("startDate cant be the past");
+      //   err.status = 400
+      //   next(err)
+      // }
+
+      // if(endDate <= startDate){
+      //   const err = new Error("endDate cant be on or before startDate");
+      //   err.status = 400
+      //   next(err)
+      // }
+
+      // need help with .check for body validation errors
+      res.status(201).json(booking);
+    } catch (e) {
+      e.status = 500;
+      next(e);
+    }
+  }
+);
 
 // edit a spot by spot id
 router.put("/:spotId", requireAuth, validateSpot, async (req, res) => {
@@ -281,7 +390,6 @@ router.put("/:spotId", requireAuth, validateSpot, async (req, res) => {
     await spot.save();
     res.status(200).json({ spot });
   } catch (e) {
-    e.status = 500;
     next(e);
   }
 });
@@ -305,11 +413,9 @@ router.delete("/:spotId", requireAuth, async (req, res) => {
     spot.destroy();
     res.json({ message: "Successfully deleted" });
   } catch (e) {
-    e.status = 500;
     next(e);
   }
 });
-
 
 // create booking from spot id
 module.exports = router;

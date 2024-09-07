@@ -654,7 +654,7 @@ Returns all the reviews written by the current user.
 - Request
 
   - Method: Get
-  - Route path: /api/reviews/:userId
+  - Route path: /api/reviews/current
   - Body: none
 
 - Successful Response

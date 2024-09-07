@@ -17,11 +17,10 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       Review.belongsToMany(models.Image, {
-      through:"ReviewImages",
-      foreignKey:"reviewId",
-      otherKey:"imageId"
+        through: "ReviewImages",
+        foreignKey: "reviewId",
+        otherKey: "imageId",
       });
-
     }
   }
   Review.init(
