@@ -21,15 +21,15 @@ module.exports = {
         },
         onDelete: "CASCADE",
       },
-      imageId: {
-        type: Sequelize.INTEGER,
+      url: {
+        type: Sequelize.STRING,
         allowNull: false,
-        references: {
-          model: "Images",
-          key: "id",
-        },
       },
-
+      preview: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -115,97 +115,101 @@ const bookingSeed = [
     spotId: 1,
     userId: 1,
     startDate: new Date("2024-09-15"),
-    endDate: new Date("2024-09-16")
+    endDate: new Date("2024-09-16"),
   },
   {
     spotId: 2,
     userId: 1,
     startDate: new Date("2024-09-24"),
-    endDate: new Date("2024-09-25")
+    endDate: new Date("2024-09-25"),
   },
   {
     spotId: 5,
     userId: 3,
     startDate: new Date("2024-10-31"),
-    endDate: new Date("2024-11-01")
+    endDate: new Date("2024-11-01"),
   },
 ];
-const imageSeed = [
-  {
-    userId: 1,
-    url: "https://placehold.co/600x400/png",
-    spotId: 1,
-  },
-  {
-    userId: 1,
-    url: "https://placehold.co/600x400/png",
-    spotId: 2,
-  },
-  {
-    userId: 1,
-    url: "https://placehold.co/600x400/png",
-    spotId: 3,
-  },
-  {
-    userId: 3,
-    url: "https://placehold.co/600x400/png",
-    spotId: 4,
-  },
-  {
-    userId: 3,
-    url: "https://placehold.co/600x400/png",
-    spotId: 5,
-  },
-  {
-    userId: 2,
-    url: "https://placehold.co/600x400/png",
-    reviewId: 1,
-  },
-  {
-    userId: 1,
-    url: "https://placehold.co/600x400/png",
-    reviewId: 2,
-  },
-  {
-    userId: 3,
-    url: "https://placehold.co/600x400/png",
-    reviewId: 3,
-  },
-];
+// const imageSeed = [
+//   {
+//     userId: 1,
+//     url: "https://placehold.co/600x400/png",
+//     spotId: 1,
+//   },
+//   {
+//     userId: 1,
+//     url: "https://placehold.co/600x400/png",
+//     spotId: 2,
+//   },
+//   {
+//     userId: 1,
+//     url: "https://placehold.co/600x400/png",
+//     spotId: 3,
+//   },
+//   {
+//     userId: 3,
+//     url: "https://placehold.co/600x400/png",
+//     spotId: 4,
+//   },
+//   {
+//     userId: 3,
+//     url: "https://placehold.co/600x400/png",
+//     spotId: 5,
+//   },
+//   {
+//     userId: 2,
+//     url: "https://placehold.co/600x400/png",
+//     reviewId: 1,
+//   },
+//   {
+//     userId: 1,
+//     url: "https://placehold.co/600x400/png",
+//     reviewId: 2,
+//   },
+//   {
+//     userId: 3,
+//     url: "https://placehold.co/600x400/png",
+//     reviewId: 3,
+//   },
+// ];
 const spotImageSeed = [
   {
-    imageId: 1,
     spotId: 1,
+    preview: true,
+    url: "https://placehold.co/600x400/png",
   },
   {
-    imageId: 2,
     spotId: 2,
+    preview: true,
+    url: "https://placehold.co/600x400/png",
   },
   {
-    imageId: 3,
     spotId: 3,
+    url: "https://placehold.co/600x400/png",
   },
   {
-    imageId: 4,
     spotId: 4,
+    url: "https://placehold.co/600x400/png",
   },
   {
-    imageId: 5,
     spotId: 5,
+    preview: true,
+    url: "https://placehold.co/600x400/png",
   },
 ];
 const reviewImageSeed = [
   {
-    imageId: 6,
     reviewId: 1,
+    url: "https://placehold.co/600x400/png",
   },
   {
-    imageId: 7,
     reviewId: 2,
+    url: "https://placehold.co/600x400/png",
   },
   {
     imageId: 8,
     reviewId: 3,
+    url: "https://placehold.co/600x400/png",
   },
 ];
 
@@ -214,7 +218,7 @@ module.exports = {
   spotSeed,
   reviewSeed,
   bookingSeed,
-  imageSeed,
+  // imageSeed,
   spotImageSeed,
   reviewImageSeed,
 };

@@ -16,14 +16,6 @@ module.exports = {
           primaryKey: true,
           type: Sequelize.INTEGER,
         },
-        imageId: {
-          type: Sequelize.INTEGER,
-          allowNull: false,
-          references: {
-            model: "Images",
-            key: "id",
-          },
-        },
 
         reviewId: {
           type: Sequelize.INTEGER,
@@ -32,6 +24,11 @@ module.exports = {
             model: "Reviews",
             key: "id",
           },
+          onDelete: "CASCADE",
+        },
+        url: {
+          type: Sequelize.STRING,
+          allowNull: false,
         },
         createdAt: {
           allowNull: false,
