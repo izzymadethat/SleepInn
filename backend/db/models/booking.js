@@ -21,19 +21,36 @@ module.exports = (sequelize, DataTypes) => {
       spotId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+          model: "Spots",
+          key: "id",
+        },
+        onDelete: "CASCADE",
       },
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+          model: "Users",
+          key: "id",
+        },
+        onDelete: "CASCADE",
       },
-      startDate:{
+      startDate: {
         type: DataTypes.DATE,
-        allowNull:false
+        allowNull: false,
       },
-      endDate:{
+      endDate: {
         type: DataTypes.DATE,
-        allowNull:false
-      }
+        allowNull: false,
+        validate: {
+          isAfterStartDate(value) {
+            if (value <= this.startDate) {
+              throw new Error("End date must be after start date");
+            }
+          },
+        },
+      },
     },
     {
       sequelize,

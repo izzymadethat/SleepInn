@@ -8,20 +8,13 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      ReviewImage.belongsTo(models.Review, {
+        foreignKey: "reviewId",
+      });
     }
   }
   ReviewImage.init(
     {
-      imageId: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: "Images",
-          key: "id",
-        },
-      },
-
       reviewId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -30,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
           key: "id",
         },
         onDelete: "CASCADE",
+      },
+      url: {
+        type: DataTypes.STRING,
+        allowNull: false,
       },
     },
     {

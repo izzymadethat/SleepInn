@@ -16,10 +16,8 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "spotId",
       });
 
-      Review.belongsToMany(models.Image, {
-        through: "ReviewImages",
+      Review.hasMany(models.ReviewImage, {
         foreignKey: "reviewId",
-        otherKey: "imageId",
       });
     }
   }
@@ -28,10 +26,20 @@ module.exports = (sequelize, DataTypes) => {
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+          model: "Users",
+          key: "id",
+        },
+        onDelete: "CASCADE",
       },
       spotId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+          model: "Spots",
+          key: "id",
+        },
+        onDelete: "CASCADE",
       },
       review: {
         type: DataTypes.STRING,
