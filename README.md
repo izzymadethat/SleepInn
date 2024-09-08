@@ -2,7 +2,9 @@
 
 ## Database Schema Design
 
-![Database design for SleepInn](./images/sleepinn-db.png)
+- updated 09/07/24
+
+![Database design for SleepInn](./images/SleepInn-updated.png)
 
 ## API Documentation
 
@@ -289,7 +291,7 @@ Returns all the spots owned (created) by the current user.
 - Request
 
   - Method: get
-  - Route path: /api/spots/:ownerId
+  - Route path: /api/spots/current
   - Body: none
 
 - Successful Response
@@ -654,7 +656,7 @@ Returns all the reviews written by the current user.
 - Request
 
   - Method: Get
-  - Route path: /api/reviews/:userId
+  - Route path: /api/reviews/current
   - Body: none
 
 - Successful Response
@@ -1383,7 +1385,7 @@ Delete an existing image for a Spot.
 - Request
 
   - Method: DELETE
-  - Route path: /api/spot-images/:imageId
+  - Route path: /api/spots/:spotId/images/:imageId
   - Body: none
 
 - Successful Response
