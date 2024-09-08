@@ -1,11 +1,11 @@
 const { requireAuth } = require("../../utils/auth");
-const { Review, Image } = require("../../db/models");
+const { Review, ReviewImage, Spot, User } = require("../../db/models");
 const { check } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
 const {
-  reviewImageAttributes,
   spotAttributes,
   userAttributes,
+  imageAttributes,
 } = require("../../utils/attributes");
 const router = require("express").Router();
 
@@ -50,12 +50,6 @@ router.get("/current", requireAuth, async (req, res, next) => {
         },
       ],
     });
-
-    if (!reviews) {
-      const err = new Error("User couldn't be found");
-      err.status = 404;
-      return next(err);
-    }
 
     res.json({ Reviews: reviews });
   } catch (error) {
@@ -162,7 +156,12 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
   try {
     // check if review exists
     const existingReview = await Review.findByPk(reviewId, {
-      include: [reviewImageAttributes],
+      include: [
+        {
+          model: ReviewImage,
+          attributes: imageAttributes,
+        },
+      ],
     });
 
     // send 404 if review doesn't exist
@@ -188,8 +187,9 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
       return next(err);
     }
 
-    const newImage = await existingReview.createImage({
+    const newImage = await ReviewImage.create({
       url,
+      reviewId,
     });
 
     return res.status(201).json({
@@ -241,7 +241,6 @@ router.put(
 
       return res.json({ review: existingReview });
     } catch (error) {
-      res.status(500);
       return next(error);
     }
   }
@@ -275,7 +274,6 @@ router.delete("/:reviewId", requireAuth, async (req, res, next) => {
 
     return res.json({ message: "Successfully deleted" });
   } catch (error) {
-    res.status(500);
     return next(error);
   }
 });
@@ -294,7 +292,9 @@ router.delete(
 
     try {
       const existingReview = await Review.findByPk(reviewId, {
-        include: [{ model: Image, where: { id: imageId } }],
+        include: [
+          { model: ReviewImage, where: { id: imageId }, required: true },
+        ],
       });
 
       // check if review exists
@@ -312,16 +312,22 @@ router.delete(
       }
 
       // check if image belongs to review
-      if (existingReview.Images[0].id !== imageId) {
+      if (existingReview.Images.length === 0) {
         const err = new Error("Review Image couldn't be found");
         err.status = 404;
         return next(err);
       }
 
-      await existingReview.removeImage(imageId);
+      const image = await ReviewImage.findByPk(imageId);
+      if (!image) {
+        const err = new Error("Review Image couldn't be found");
+        err.status = 404;
+        return next(err);
+      }
+
+      await image.destroy();
       return res.json({ message: "Successfully deleted" });
     } catch (error) {
-      res.status(500);
       return next(error);
     }
   }
