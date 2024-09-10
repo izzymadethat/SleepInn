@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const { requireAuth } = require("../../utils/auth");
 const { Booking, Spot } = require("../../db/models");
-const { route } = require("./reviews");
+const { check } = require("express-validator");
 const { spotAttributes } = require("../../utils/attributes");
 const { check } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
