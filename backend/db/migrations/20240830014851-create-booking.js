@@ -22,6 +22,7 @@ module.exports = {
             model: "Spots",
             key: "id",
           },
+          onDelete: "CASCADE",
         },
         userId: {
           type: Sequelize.INTEGER,
@@ -30,8 +31,13 @@ module.exports = {
             model: "Spots",
             key: "id",
           },
+          onDelete: "CASCADE",
         },
-        bookingDate: {
+        startDate: {
+          type: Sequelize.DATE,
+          allowNull: false,
+        },
+        endDate: {
           type: Sequelize.DATE,
           allowNull: false,
         },
@@ -50,6 +56,7 @@ module.exports = {
     );
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Bookings");
+    options.tableName = "Bookings";
+    await queryInterface.dropTable(options);
   },
 };

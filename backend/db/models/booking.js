@@ -21,14 +21,35 @@ module.exports = (sequelize, DataTypes) => {
       spotId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+          model: "Spots",
+          key: "id",
+        },
+        onDelete: "CASCADE",
       },
       userId: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+          model: "Users",
+          key: "id",
+        },
+        onDelete: "CASCADE",
       },
-      bookingDate: {
+      startDate: {
         type: DataTypes.DATE,
         allowNull: false,
+      },
+      endDate: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        validate: {
+          isAfterStartDate(value) {
+            if (value <= this.startDate) {
+              throw new Error("End date must be after start date");
+            }
+          },
+        },
       },
     },
     {

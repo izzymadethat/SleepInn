@@ -2,7 +2,7 @@
 
 ## Database Schema Design
 
-![Database design for SleepInn](../images/sleepinn-db.png)
+![Database design for SleepInn](../images/SleepInn-updated.png)
 
 ## API Documentation
 
@@ -289,7 +289,7 @@ Returns all the spots owned (created) by the current user.
 - Request
 
   - Method: get
-  - Route path: /api/spots/:ownerId
+  - Route path: /api/spots/current
   - Body: none
 
 - Successful Response
@@ -484,7 +484,7 @@ Create and return a new image for a spot specified by id.
     ```json
     {
       "url": "image url",
-      "preview": true/spots/:spotId
+      "preview": true
     }
     ```
 
@@ -653,8 +653,8 @@ Returns all the reviews written by the current user.
 - Require Authentication: true
 - Request
 
-  - Method: get
-  - Route path: /api/users/currentUser/reviews
+  - Method: Get
+  - Route path: /api/reviews/current
   - Body: none
 
 - Successful Response
@@ -711,8 +711,8 @@ Returns all the reviews that belong to a spot specified by id.
 - Require Authentication: false
 - Request
 
-  - Method:get
-  - Route path: /api/spots/:spotId/reviews
+  - Method: Get
+  - Route path: /api/reviews/:spotId
   - Body: none
 
 - Successful Response
@@ -770,7 +770,7 @@ Create and return a new review for a spot specified by id.
 - Request
 
   - Method: POST
-  - Route path: /api/spots/:spotId/reviews
+  - Route path: /api/reviews/:spotId
   - Headers:
     - Content-Type: application/json
   - Body:
@@ -1383,7 +1383,7 @@ Delete an existing image for a Spot.
 - Request
 
   - Method: DELETE
-  - Route path: /api/spot-images/:imageId
+  - Route path: /api/spots/:spotId/images/:imageId
   - Body: none
 
 - Successful Response
