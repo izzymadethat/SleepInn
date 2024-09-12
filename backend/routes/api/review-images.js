@@ -8,7 +8,7 @@ const { Review, ReviewImage } = require("../../db/models");
     Add an image to a review based on the review's id
 ==========================================
 */
-router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
+router.post("/", requireAuth, async (req, res, next) => {
   const reviewId = req.params.reviewId;
   const uid = req.user.id;
   const { url } = req.body;
