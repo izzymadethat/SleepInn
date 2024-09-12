@@ -1,7 +1,11 @@
 "use strict";
 
-const { options } = require("../../routes");
+// const { options } = require("../../routes");
 
+let options = {};
+if (process.env.NODE_ENV === "production") {
+  options.schema = process.env.SCHEMA;
+}
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
