@@ -16,7 +16,7 @@ router.use("/session", sessionRouter);
 router.use("/spots", spotsRouter);
 
 router.use("/users", usersRouter);
-router.use("/booking", bookingRouter);
+router.use("/bookings", bookingRouter);
 router.use("/reviews", reviewsRouter);
 router.use("/spot-images", spotImagesRouter);
 router.use("/review-images", reviewImagesRouter);
