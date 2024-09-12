@@ -13,30 +13,6 @@ const {
   spotAttributes,
 } = require("../../utils/attributes");
 
-const validateBooking = [
-  check("startDate")
-    .exists({ checkFalsy: true })
-    .custom((value, { req }) => {
-      const today = new Date();
-      const start = new Date(value);
-      if (start < today) {
-        throw new Error("startDate cannot be in the past");
-      }
-      return true;
-    }),
-  check("endDate")
-    .exists({ checkFalsy: true })
-    .custom((value, { req }) => {
-      const start = new Date(req.body.startDate);
-      const end = new Date(value);
-      if (end <= start) {
-        throw new Error("End date cannot be on or before start date");
-      }
-      return true;
-    }),
-  handleValidationErrors,
-];
-
 const validateSpot = [
   check("address")
     .exists({ checkFalsy: true })
@@ -216,10 +192,53 @@ router.get("/:spotId", async (req, res, next) => {
 });
 
 // create a spot
-router.post("/", requireAuth, validateSpot, async (req, res, next) => {
+router.post("/", requireAuth, async (req, res, next) => {
   const ownerId = req.user.id;
   const { address, city, state, country, lat, lng, name, description, price } =
     req.body;
+
+  // Validation errors object
+  let errors = {};
+
+  // Required fields validation
+  if (!address) errors.address = "Street address is required";
+  if (!city) errors.city = "City is required";
+  if (!state) errors.state = "State is required";
+  if (!country) errors.country = "Country is required";
+
+  // Latitude validation (must be between -90 and 90)
+  if (lat === undefined || lat < -90 || lat > 90) {
+    errors.lat = "Latitude must be within -90 and 90";
+  }
+
+  // Longitude validation (must be between -180 and 180)
+  if (lng === undefined || lng < -180 || lng > 180) {
+    errors.lng = "Longitude must be within -180 and 180";
+  }
+
+  // Name validation (must be less than 50 characters)
+  if (!name || name.length > 50) {
+    errors.name = "Name must be less than 50 characters";
+  }
+
+  // Description validation (must not be empty)
+  if (!description) {
+    errors.description = "Description is required";
+  }
+
+  // Price validation (must be a positive number)
+  if (price === undefined || price <= 0) {
+    errors.price = "Price per day must be a positive number";
+  }
+
+  // If there are validation errors, return a 400 response with the errors
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({
+      message: "Validation Error",
+      errors,
+    });
+  }
+
   try {
     const spot = await Spot.create({
       ownerId,
@@ -238,7 +257,7 @@ router.post("/", requireAuth, validateSpot, async (req, res, next) => {
       err.status = 404;
       return next(err);
     }
-    res.status(201).json({ spot });
+    res.status(201).json(spot);
   } catch (e) {
     next(e);
   }
