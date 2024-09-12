@@ -7,7 +7,7 @@ const {
   userAttributes,
   imageAttributes,
 } = require("../../utils/attributes");
-const router = require("express").Router();
+const router = require("express").Router({ mergeParams: true });
 
 const validateReview = [
   check("review")
@@ -44,9 +44,9 @@ router.get("/current", requireAuth, async (req, res, next) => {
           attributes: spotAttributes,
         },
         {
-          model: Image,
+          model: ReviewImage,
           as: "ReviewImages",
-          attributes: reviewImageAttributes,
+          attributes: imageAttributes,
         },
       ],
     });
@@ -103,7 +103,7 @@ router.get("/:spotId", async (req, res, next) => {
     Create a review for a spot based on the spot's id
 ==========================================
 */
-router.post("/:spotId", requireAuth, validateReview, async (req, res, next) => {
+router.post("/", requireAuth, async (req, res, next) => {
   const spotId = req.params.spotId;
   const uid = req.user.id;
   const { review, stars } = req.body;
@@ -209,7 +209,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
 router.put(
   "/:reviewId",
   requireAuth,
-  validateReview,
+
   async (req, res, next) => {
     const reviewId = req.params.reviewId;
     const uid = req.user.id;
