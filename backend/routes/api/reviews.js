@@ -21,6 +21,9 @@ const validateReview = [
   handleValidationErrors,
 ];
 
+const reviewImagesRouter = require("./review-images");
+router.use("/:reviewId/images", reviewImagesRouter);
+
 /*
 ========================================
   Get all the reviews of the current user
@@ -138,64 +141,6 @@ router.post("/", requireAuth, validateReview, async (req, res, next) => {
 
     const newReview = await Review.create(reviewObj);
     return res.json({ newReview });
-  } catch (error) {
-    next(error);
-  }
-});
-
-/*
-==========================================
-    Add an image to a review based on the review's id
-==========================================
-*/
-router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
-  const reviewId = req.params.reviewId;
-  const uid = req.user.id;
-  const { url } = req.body;
-
-  try {
-    // check if review exists
-    const existingReview = await Review.findByPk(reviewId, {
-      include: [
-        {
-          model: ReviewImage,
-          attributes: imageAttributes,
-        },
-      ],
-    });
-
-    // send 404 if review doesn't exist
-    if (!existingReview) {
-      const err = new Error("Review couldn't be found");
-      err.status = 404;
-      return next(err);
-    }
-
-    //   check if review belongs to user
-    if (existingReview.userId !== uid) {
-      const err = new Error("Forbidden");
-      err.status = 403;
-      return next(err);
-    }
-
-    // check if maxed images - max of 10
-    if (existingReview.Images.length >= 10) {
-      const err = new Error(
-        "Maximum number of images for this resource was reached"
-      );
-      err.status = 403;
-      return next(err);
-    }
-
-    const newImage = await ReviewImage.create({
-      url,
-      reviewId,
-    });
-
-    return res.status(201).json({
-      id: newImage.id,
-      url: newImage.url,
-    });
   } catch (error) {
     next(error);
   }
