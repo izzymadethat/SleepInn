@@ -55,52 +55,8 @@ router.get("/current", requireAuth, async (req, res, next) => {
   }
 });
 
-// get all bookings for a spot based on spot id
-router.get("/", async (req, res, next) => {
-  const spotId = Number(req.params.spotId);
-  const uid = req.user.id;
-
-  try {
-    const spot = await Spot.findByPk(spotId);
-    if (!spot) {
-      const err = new Error("Spot couldn't be found");
-      err.status = 404;
-      return next(err);
-    }
-    // is the user the owner of the spot?
-    const isOwner = spot.ownerId === uid;
-
-    let bookings;
-
-    // if the user is the owner of the spot, include all details
-    if (isOwner) {
-      bookings = await Booking.findAll({
-        where: { spotId },
-        include: [
-          {
-            model: User,
-            attributes: userAttributes, // only has id, firstName, lastName
-            as: "User",
-          },
-        ],
-      });
-
-      return res.json({ Bookings: bookings });
-    }
-
-    // if the user is not the owner of the spot, only include basic details
-    bookings = await Booking.findAll({
-      where: { spotId },
-      attributes: ["spotId", "startDate", "endDate"],
-    });
-    return res.json({ Bookings: bookings });
-  } catch (error) {
-    next(error);
-  }
-});
-
 // create a booking from a spot based on spot id
-router.post("/", requireAuth, validateBooking, async (req, res) => {
+router.post("/", requireAuth, validateBooking, async (req, res, next) => {
   const ownerId = req.user.id;
   const { startDate, endDate } = req.body;
   const spotId = Number(req.params.spotId);
