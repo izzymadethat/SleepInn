@@ -216,7 +216,7 @@ router.get("/:spotId", async (req, res, next) => {
 });
 
 // create a spot
-router.post("/", requireAuth, async (req, res, next) => {
+router.post("/", requireAuth, validateSpot, async (req, res, next) => {
   const ownerId = req.user.id;
   const { address, city, state, country, lat, lng, name, description, price } =
     req.body;
@@ -274,7 +274,7 @@ router.post("/:spotId/images", requireAuth, async (req, res, next) => {
 });
 
 // edit a spot by spot id
-router.put("/:spotId", requireAuth, async (req, res, next) => {
+router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
   const ownerId = req.user.id;
   const { address, city, state, country, lat, lng, name, description, price } =
     req.body;
