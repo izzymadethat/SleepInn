@@ -238,7 +238,7 @@ router.get("/:spotId", async (req, res, next) => {
       Owner: preSpot.Owner,
     };
 
-   
+
 
     res.json(spot);
   } catch (e) {
@@ -269,7 +269,26 @@ router.post("/", requireAuth, validateSpot, async (req, res) => {
       err.status = 404;
       return next(err);
     }
-    res.status(201).json({ spot });
+
+     const formattedSpot = {
+      id: spot.id,
+      ownerId: spot.ownerId,
+      address: spot.address,
+      city: spot.city,
+      state: spot.state,
+      country: spot.country,
+      lat: spot.lat,
+      lng: spot.lng,
+      name: spot.name,
+      description: spot.description,
+      price: spot.price,
+      createdAt: spot.createdAt,
+      updatedAt: spot.updatedAt
+    };
+
+    // Send the response with status 201 Created
+    res.status(201).json(formattedSpot);
+
   } catch (e) {
     next(e);
   }
