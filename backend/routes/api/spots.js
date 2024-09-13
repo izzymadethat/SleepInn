@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Spot, User, Booking, SpotImage } = require("../../db/models");
+const { Spot, User, Booking, SpotImage, Review } = require("../../db/models");
 
 const { requireAuth } = require("../../utils/auth");
 const Sequelize = require("sequelize");
@@ -177,9 +177,26 @@ router.get("/current", requireAuth, async (req, res, next) => {
 // get a single spot
 router.get("/:spotId", async (req, res, next) => {
   const spotId = Number(req.params.spotId);
+  let avgStarRating
+  const numReviews = await Review.count({
+    where: { spotId }
+  });
+
+  const reviews = await Review.findAll({
+    where: { spotId },
+    attributes: ['stars']
+  });
+
+  if (reviews.length > 0) {
+    const totalStars = reviews.reduce((acc, review) => acc + review.stars, 0);
+    avgStarRating = totalStars / numReviews;
+  } else {
+    // Handle case where there are no reviews
+    avgStarRating = 0;
+  }
 
   try {
-    const spot = await Spot.findByPk(spotId, {
+    const preSpot = await Spot.findByPk(spotId, {
       include: [
         {
           model: User,
@@ -193,12 +210,35 @@ router.get("/:spotId", async (req, res, next) => {
         },
       ],
     });
-    if (!spot) {
+    // preSpot.avgRating = avgStarRating;
+
+    if (!preSpot) {
       //spot not found
       const err = new Error("Spot couldn't be found");
       err.status = 404;
       return next(err);
     }
+    const spot = {
+      id: preSpot.id,
+      ownerId: preSpot.ownerId,
+      address: preSpot.address,
+      city: preSpot.city,
+      state: preSpot.state,
+      country: preSpot.country,
+      lat: preSpot.lat,
+      lng: preSpot.lng,
+      name: preSpot.name,
+      description: preSpot.description,
+      price: preSpot.price,
+      createdAt: preSpot.createdAt,
+      updatedAt: preSpot.updatedAt,
+      numReviews,
+      avgStarRating,
+      SpotImages: preSpot.SpotImages,
+      Owner: preSpot.Owner,
+    };
+
+   
 
     res.json(spot);
   } catch (e) {
