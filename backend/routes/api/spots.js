@@ -392,6 +392,7 @@ router.post("/:spotId/images", requireAuth, async (req, res, next) => {
       preview,
     });
     const formattedImage = {
+      id: newImage.id,
      url: newImage.url,
      preview:newImage.preview
     }
@@ -437,7 +438,23 @@ router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
       price,
     });
     await spot.save();
-    res.status(200).json({ spot });
+    const formattedSpot = {
+      id: spot.id,
+      ownerId,
+      address,
+      city,
+      state,
+      country,
+      lat,
+      lng,
+      name,
+      description,
+      price,
+      createdAt: spot.createdAt,
+      updatedAt: spot.updatedAt,
+
+    }
+    res.status(200).json({ formattedSpot });
   } catch (e) {
     next(e);
   }

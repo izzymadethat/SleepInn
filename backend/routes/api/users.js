@@ -9,6 +9,12 @@ const { User } = require("../../db/models");
 
 // middleware to validate signup
 const validateSignup = [
+  check("lastName")
+    .exists({ checkFalsy: true })
+    .withMessage("Please provide a lastName."),
+  check("firstName")
+    .exists({ checkFalsy: true })
+    .withMessage("Please provide a firstName."),
   check("email")
     .exists({ checkFalsy: true })
     .isEmail()
