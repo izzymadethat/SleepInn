@@ -3,7 +3,6 @@ const router = express.Router();
 const { Spot, User, Booking, SpotImage } = require("../../db/models");
 const bookingsRouter = require("./booking");
 const reviewsRouter = require("./reviews");
-const { Spot, User, Booking, SpotImage, Review } = require("../../db/models");
 
 const { requireAuth } = require("../../utils/auth");
 const Sequelize = require("sequelize");
@@ -344,6 +343,7 @@ router.post("/", requireAuth, async (req, res, next) => {
       return next(err);
     }
 
+
      const formattedSpot = {
       id: spot.id,
       ownerId: spot.ownerId,
@@ -362,6 +362,7 @@ router.post("/", requireAuth, async (req, res, next) => {
 
     // Send the response with status 201 Created
     res.status(201).json(formattedSpot);
+
 
   } catch (e) {
     next(e);
