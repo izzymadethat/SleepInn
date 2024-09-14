@@ -3,6 +3,7 @@ const router = express.Router();
 const { Spot, User, Booking, SpotImage } = require("../../db/models");
 const bookingsRouter = require("./booking");
 const reviewsRouter = require("./reviews");
+
 const { requireAuth } = require("../../utils/auth");
 const Sequelize = require("sequelize");
 const { check } = require("express-validator");
@@ -161,6 +162,23 @@ router.get("/current", requireAuth, async (req, res, next) => {
 // get a single spot
 router.get("/:spotId", async (req, res, next) => {
   const spotId = Number(req.params.spotId);
+  let avgStarRating
+  const numReviews = await Review.count({
+    where: { spotId }
+  });
+
+  const reviews = await Review.findAll({
+    where: { spotId },
+    attributes: ['stars']
+  });
+
+  if (reviews.length > 0) {
+    const totalStars = reviews.reduce((acc, review) => acc + review.stars, 0);
+    avgStarRating = totalStars / numReviews;
+  } else {
+    // Handle case where there are no reviews
+    avgStarRating = 0;
+  }
 
   try {
     const spot = await Spot.findByPk(spotId, {
@@ -178,14 +196,37 @@ router.get("/:spotId", async (req, res, next) => {
         },
       ],
     });
-    if (!spot) {
+    // preSpot.avgRating = avgStarRating;
+
+    if (!preSpot) {
       //spot not found
       const err = new Error("Spot couldn't be found");
       err.status = 404;
       return next(err);
     }
+    const spotResult = {
+      id: preSpot.id,
+      ownerId: preSpot.ownerId,
+      address: preSpot.address,
+      city: preSpot.city,
+      state: preSpot.state,
+      country: preSpot.country,
+      lat: preSpot.lat,
+      lng: preSpot.lng,
+      name: preSpot.name,
+      description: preSpot.description,
+      price: preSpot.price,
+      createdAt: preSpot.createdAt,
+      updatedAt: preSpot.updatedAt,
+      numReviews,
+      avgStarRating,
+      SpotImages: preSpot.SpotImages,
+      Owner: preSpot.Owner,
+    };
 
-    res.json(spot);
+
+
+    res.json(spotResult);
   } catch (e) {
     next(e);
   }
@@ -301,7 +342,28 @@ router.post("/", requireAuth, async (req, res, next) => {
       err.status = 404;
       return next(err);
     }
-    res.status(201).json(spot);
+
+
+     const formattedSpot = {
+      id: spot.id,
+      ownerId: spot.ownerId,
+      address: spot.address,
+      city: spot.city,
+      state: spot.state,
+      country: spot.country,
+      lat: spot.lat,
+      lng: spot.lng,
+      name: spot.name,
+      description: spot.description,
+      price: spot.price,
+      createdAt: spot.createdAt,
+      updatedAt: spot.updatedAt
+    };
+
+    // Send the response with status 201 Created
+    res.status(201).json(formattedSpot);
+
+
   } catch (e) {
     next(e);
   }
@@ -330,7 +392,12 @@ router.post("/:spotId/images", requireAuth, async (req, res, next) => {
       url,
       preview,
     });
-    res.status(201).json(newImage);
+    const formattedImage = {
+      id: newImage.id,
+     url: newImage.url,
+     preview:newImage.preview
+    }
+    res.status(201).json(formattedImage);
   } catch (e) {
     next(e);
   }
@@ -372,7 +439,23 @@ router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
       price,
     });
     await spot.save();
-    res.status(200).json({ spot });
+    const formattedSpot = {
+      id: spot.id,
+      ownerId,
+      address,
+      city,
+      state,
+      country,
+      lat,
+      lng,
+      name,
+      description,
+      price,
+      createdAt: spot.createdAt,
+      updatedAt: spot.updatedAt,
+
+    }
+    res.status(200).json({ formattedSpot });
   } catch (e) {
     next(e);
   }

@@ -57,10 +57,10 @@ module.exports = {
           type: Sequelize.DECIMAL(10, 2),
           allowNull: false,
         },
-        averageRating: {
+        avgRating: {
           type: Sequelize.FLOAT,
         },
-        previewImg: {
+        previewImage: {
           type: Sequelize.STRING,
         },
         createdAt: {

@@ -1,4 +1,4 @@
-/* 
+/*
     Constants to get the specified attributes
     of requested data from models
 */
@@ -19,4 +19,4 @@ exports.spotAttributes = [
 
 exports.imageAttributes = ["id", "url"];
 
-exports.userAttributes = ["id", "username", "email"];
+exports.userAttributes = ["id", "firstName", "lastName"];

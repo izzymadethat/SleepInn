@@ -108,6 +108,12 @@ const reviewSeed = [
     review: "Great place!",
     stars: 4.5,
   },
+  {
+    userId: 2,
+    spotId: 4,
+    review: "Great place!",
+    stars: 4.5,
+  },
 ];
 
 const bookingSeed = [
