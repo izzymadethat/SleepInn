@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { Spot, User, Booking, SpotImage } = require("../../db/models");
+const { Spot, User, Booking, SpotImage, Review } = require("../../db/models");
 const bookingsRouter = require("./booking");
 const reviewsRouter = require("./reviews");
 
@@ -162,14 +162,14 @@ router.get("/current", requireAuth, async (req, res, next) => {
 // get a single spot
 router.get("/:spotId", async (req, res, next) => {
   const spotId = Number(req.params.spotId);
-  let avgStarRating
+  let avgStarRating;
   const numReviews = await Review.count({
-    where: { spotId }
+    where: { spotId },
   });
 
   const reviews = await Review.findAll({
     where: { spotId },
-    attributes: ['stars']
+    attributes: ["stars"],
   });
 
   if (reviews.length > 0) {
@@ -181,7 +181,7 @@ router.get("/:spotId", async (req, res, next) => {
   }
 
   try {
-    const spot = await Spot.findByPk(spotId, {
+    const preSpot = await Spot.findByPk(spotId, {
       attributes: spotAttributes,
       include: [
         {
@@ -223,8 +223,6 @@ router.get("/:spotId", async (req, res, next) => {
       SpotImages: preSpot.SpotImages,
       Owner: preSpot.Owner,
     };
-
-
 
     res.json(spotResult);
   } catch (e) {
@@ -343,8 +341,7 @@ router.post("/", requireAuth, async (req, res, next) => {
       return next(err);
     }
 
-
-     const formattedSpot = {
+    const formattedSpot = {
       id: spot.id,
       ownerId: spot.ownerId,
       address: spot.address,
@@ -357,13 +354,11 @@ router.post("/", requireAuth, async (req, res, next) => {
       description: spot.description,
       price: spot.price,
       createdAt: spot.createdAt,
-      updatedAt: spot.updatedAt
+      updatedAt: spot.updatedAt,
     };
 
     // Send the response with status 201 Created
     res.status(201).json(formattedSpot);
-
-
   } catch (e) {
     next(e);
   }
@@ -394,9 +389,9 @@ router.post("/:spotId/images", requireAuth, async (req, res, next) => {
     });
     const formattedImage = {
       id: newImage.id,
-     url: newImage.url,
-     preview:newImage.preview
-    }
+      url: newImage.url,
+      preview: newImage.preview,
+    };
     res.status(201).json(formattedImage);
   } catch (e) {
     next(e);
@@ -453,8 +448,7 @@ router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
       price,
       createdAt: spot.createdAt,
       updatedAt: spot.updatedAt,
-
-    }
+    };
     res.status(200).json({ formattedSpot });
   } catch (e) {
     next(e);
