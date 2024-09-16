@@ -81,7 +81,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
     const existingReview = await Review.findByPk(reviewId, {
       include: [
         {
-          model: ReviewImages,
+          model: ReviewImage,
           attributes: ["id", "url"],
         },
       ],
@@ -101,7 +101,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
       });
     }
 
-    const reviewImages = ReviewImages.findAll({
+    const reviewImages = ReviewImage.findAll({
       where: { reviewId },
     });
 
@@ -113,7 +113,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
     }
 
     // Now create the new image
-    const newImage = await ReviewImages.create({
+    const newImage = await ReviewImage.create({
       url,
       reviewId,
     });
