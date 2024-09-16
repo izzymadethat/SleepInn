@@ -81,6 +81,30 @@ const validateQueryParams = [
   handleValidationErrors,
 ];
 
+const validateBooking = [
+  check("startDate")
+    .exists({ checkFalsy: true })
+    .custom((value, { req }) => {
+      const today = new Date();
+      const start = new Date(value);
+      if (start < today) {
+        throw new Error("startDate cannot be in the past");
+      }
+      return true;
+    }),
+  check("endDate")
+    .exists({ checkFalsy: true })
+    .custom((value, { req }) => {
+      const start = new Date(req.body.startDate);
+      const end = new Date(value);
+      if (end <= start) {
+        throw new Error("End date cannot be on or before start date");
+      }
+      return true;
+    }),
+  handleValidationErrors,
+];
+
 router.use("/:spotId/bookings", bookingsRouter);
 router.use("/:spotId/reviews", reviewsRouter);
 
