@@ -163,7 +163,7 @@ router.post("/", requireAuth, validateReview, async (req, res, next) => {
     }
 
     const newReview = await Review.create(reviewObj);
-    return res.json({ newReview });
+    return res.json( newReview );
   } catch (error) {
     next(error);
   }
