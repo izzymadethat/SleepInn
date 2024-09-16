@@ -12,7 +12,7 @@ const bookingsRouter = require("./booking");
 const reviewsRouter = require("./reviews");
 
 const { requireAuth } = require("../../utils/auth");
-const Sequelize = require("sequelize");
+const { Op } = require("sequelize");
 const { check } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
 const {
