@@ -465,6 +465,72 @@ router.post("/:spotId/images", requireAuth, async (req, res, next) => {
   }
 });
 
+// ==========================================
+//  Create a booking for a spot based on spot id
+// ==========================================
+
+router.post(
+  "/:spotId/bookings",
+  requireAuth,
+  validateBooking,
+  async (req, res, next) => {
+    const ownerId = req.user.id;
+    const { startDate, endDate } = req.body;
+    const spotId = req.params.spotId;
+
+    try {
+      // Check if the spot exists
+      const spot = await Spot.findByPk(spotId);
+      if (!spot) {
+        return res.status(404).json({ message: "Spot couldn't be found" });
+      }
+
+      // Check if the user is the owner of the spot
+      if (spot.ownerId === ownerId) {
+        return res
+          .status(403)
+          .json({ message: "Spot must not belong to the user" });
+      }
+
+      // Check if the end date is before the start date
+      if (new Date(endDate) <= new Date(startDate)) {
+        return res
+          .status(403)
+          .json({ message: "End date cannot be before the start date" });
+      }
+
+      // Check for booking conflicts
+      const bookingConflicts = await Booking.findAll({
+        where: {
+          spotId,
+          [Op.or]: [
+            { startDate: { [Op.between]: [startDate, endDate] } },
+            { endDate: { [Op.between]: [startDate, endDate] } },
+          ],
+        },
+      });
+
+      if (bookingConflicts.length > 0) {
+        return res.status(403).json({
+          message: "Sorry, this spot is already booked for the specified dates",
+        });
+      }
+
+      // Create the booking
+      const booking = await Booking.create({
+        spotId,
+        userId: ownerId,
+        startDate,
+        endDate,
+      });
+
+      res.status(201).json(booking);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 // edit a spot by spot id
 router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
   const ownerId = req.user.id;
@@ -522,28 +588,32 @@ router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
   }
 });
 
-// delete spot by spot id
-router.delete("/:spotId", requireAuth, async (req, res, next) => {
-  const spotId = req.params.spotId;
+router.delete("/:spotId", requireAuth, async (req, res) => {
+  const { spotId } = req.params;
   const userId = req.user.id;
 
   try {
     const spot = await Spot.findByPk(spotId);
+
     if (!spot) {
-      const err = new Error("Spot couldn't be found");
-      err.status = 404;
-      return next(err);
+      return res.status(404).json({ message: "Spot couldn't be found" });
     }
+
     if (spot.ownerId !== userId) {
-      const err = new Error("Spot must belong to the current user");
-      err.status = 403;
-      return next(err);
+      return res.status(403).json({
+        message: "Forbidden: You do not have permission to delete this spot",
+      });
+    }
+
+    if (spot.ownerId !== userId) {
+      return res.status(403).json({ message: "Forbidden" });
     }
 
     await spot.destroy();
-    res.json({ message: "Successfully deleted" });
-  } catch (e) {
-    next(e);
+
+    return res.status(200).json({ message: "Successfully deleted" });
+  } catch (err) {
+    next(err);
   }
 });
 
