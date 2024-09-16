@@ -66,7 +66,7 @@ router.post("/", requireAuth, async (req, res, next) => {
 //  Delete a review image
 // ==========================================
 router.delete("/:imageId", requireAuth, async (req, res, next) => {
-  const imageId = Number(req.params.imageId);
+  const imageId = req.params.imageId;
   const userId = req.user.id;
 
   try {

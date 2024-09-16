@@ -25,11 +25,11 @@ const validateSpot = [
     .withMessage("Country is required"), // 400
   check("lat")
     .exists({ checkFalsy: true })
-    .isDecimal({ min: -90, max: 90 })
+    .isFloat({ min: -90, max: 90 })
     .withMessage("Latitude is not valid"),
   check("lng")
     .exists({ checkFalsy: true })
-    .isDecimal({ min: -180, max: 180 })
+    .isFloat({ min: -180, max: 180 })
     .withMessage("Longitude is not valid"),
   check("name")
     .exists({ checkFalsy: true })
@@ -40,7 +40,7 @@ const validateSpot = [
     .withMessage("Description is required"),
   check("price")
     .exists({ checkFalsy: true })
-    .isDecimal({ min: 0 })
+    .isFloat({ gt: 0 })
     .withMessage("Price per day is required"),
   handleValidationErrors,
 ];
@@ -146,7 +146,6 @@ router.get("/", validateQueryParams, async (req, res, next) => {
 // correction: get all spots of the *CURRENT USER*
 // route should be /api/spots/current
 router.get("/current", requireAuth, async (req, res, next) => {
-  // const ownerId = Number(req.params.ownerId);
   const ownerId = req.user.id; // comes from the middleware to add user to req
   try {
     const allSpots = await Spot.findAll({
@@ -161,7 +160,7 @@ router.get("/current", requireAuth, async (req, res, next) => {
 
 // get a single spot
 router.get("/:spotId", async (req, res, next) => {
-  const spotId = Number(req.params.spotId);
+  const spotId = req.params.spotId;
   let avgStarRating;
   const numReviews = await Review.count({
     where: { spotId },
@@ -232,7 +231,7 @@ router.get("/:spotId", async (req, res, next) => {
 
 // get all bookings for a spot based on spot id
 router.get("/:spotId/bookings", requireAuth, async (req, res, next) => {
-  const spotId = Number(req.params.spotId);
+  const spotId = req.params.spotId;
   const uid = req.user.id;
 
   try {
@@ -280,28 +279,60 @@ router.get("/:spotId/reviews", async (req, res, next) => {
   const spotId = req.params.spotId;
 
   try {
-    // Check if the spot exists
-    const spot = await Spot.findByPk(spotId);
-    if (!spot) {
-      return res.status(404).json({ message: "Spot couldn't be found" });
-    }
-
-    // Find all reviews for the spot
-    const reviews = await Review.findAll({
-      where: {
-        spotId,
-      },
+    const spot = await Spot.findOne({
+      where: { id: spotId },
       include: [
         {
-          model: User,
-          attributes: userAttributes,
-        },
-        {
-          model: ReviewImage,
-          as: "ReviewImages",
-          attributes: imageAttributes,
+          model: Review,
+          attributes: [
+            "id",
+            "userId",
+            "spotId",
+            "review",
+            "stars",
+            "createdAt",
+            "updatedAt",
+          ],
+          include: [
+            {
+              model: User,
+              attributes: userAttributes,
+            },
+            {
+              model: ReviewImage,
+              attributes: imageAttributes,
+            },
+          ],
         },
       ],
+    });
+
+    // If spot is not found, return a 404 error
+    if (!spot) {
+      return res.status(404).json({
+        message: "Spot couldn't be found",
+      });
+    }
+
+    const reviews = spot.Reviews.map((review) => {
+      return {
+        id: review.id,
+        userId: review.userId,
+        spotId: review.spotId,
+        review: review.review,
+        stars: review.stars,
+        createdAt: review.createdAt,
+        updatedAt: review.updatedAt,
+        User: {
+          id: review.User.id,
+          firstName: review.User.firstName,
+          lastName: review.User.lastName,
+        },
+        ReviewImages: review.ReviewImages.map((image) => ({
+          id: image.id,
+          url: image.url,
+        })),
+      };
     });
 
     res.json({ Reviews: reviews });
@@ -404,7 +435,7 @@ router.post("/", requireAuth, async (req, res, next) => {
 router.post("/:spotId/images", requireAuth, async (req, res, next) => {
   const ownerId = req.user.id;
   const { url, preview } = req.body;
-  const spotId = Number(req.params.spotId);
+  const spotId = req.params.spotId;
   try {
     const spot = await Spot.findByPk(spotId);
 
@@ -440,7 +471,7 @@ router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
   const { address, city, state, country, lat, lng, name, description, price } =
     req.body;
 
-  const spotId = Number(req.params.spotId);
+  const spotId = req.params.spotId;
 
   try {
     const spot = await Spot.findByPk(spotId);
@@ -485,7 +516,7 @@ router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
       createdAt: spot.createdAt,
       updatedAt: spot.updatedAt,
     };
-    res.status(200).json({ formattedSpot });
+    res.status(200).json(formattedSpot);
   } catch (e) {
     next(e);
   }
@@ -493,7 +524,7 @@ router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
 
 // delete spot by spot id
 router.delete("/:spotId", requireAuth, async (req, res, next) => {
-  const spotId = Number(req.params.spotId);
+  const spotId = req.params.spotId;
   const userId = req.user.id;
 
   try {

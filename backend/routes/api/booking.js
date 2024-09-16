@@ -67,7 +67,7 @@ router.post(
   async (req, res, next) => {
     const ownerId = req.user.id;
     const { startDate, endDate } = req.body;
-    const spotId = Number(req.params.spotId);
+    const spotId = req.params.spotId;
 
     try {
       // Check if the spot exists
@@ -128,7 +128,7 @@ router.post(
 
 router.put("/:bookingId", requireAuth, async (req, res, next) => {
   const userId = req.user.id;
-  const bookingId = Number(req.params.bookingId);
+  const bookingId = req.params.bookingId;
   const { startDate, endDate } = req.body;
 
   try {
@@ -200,7 +200,7 @@ router.put("/:bookingId", requireAuth, async (req, res, next) => {
 // ==========================================
 router.delete("/:bookingId", requireAuth, async (req, res, next) => {
   const userId = req.user.id;
-  const bookingId = Number(req.params.bookingId);
+  const bookingId = req.params.bookingId;
 
   try {
     // Find the booking
