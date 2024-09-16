@@ -60,6 +60,70 @@ router.get("/current", requireAuth, async (req, res, next) => {
   }
 });
 
+// Add an image to a review based on the review's id
+// /api/reviews/:reviewId/images
+router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
+  const reviewId = req.params.reviewId;
+  const uid = req.user.id;
+  const { url } = req.body;
+
+  if (!url) {
+    return res.status(400).json({
+      message: "Validation error",
+      errors: {
+        url: "Url is required",
+      },
+    });
+  }
+
+  try {
+    // check if review exists
+    const existingReview = await Review.findByPk(reviewId, {
+      include: [
+        {
+          model: ReviewImages,
+          attributes: ["id", "url"],
+        },
+      ],
+    });
+
+    // review doesn't exist
+    if (!existingReview) {
+      return res.status(404).json({
+        message: "Review couldn't be found",
+      });
+    }
+
+    // review doesn't belong to user
+    if (existingReview.userId !== uid) {
+      return res.status(403).json({
+        message: "Forbidden",
+      });
+    }
+
+    const reviewImages = ReviewImages.findAll({
+      where: { reviewId },
+    });
+
+    // check if maxed images - max of 10
+    if (reviewImages.length >= 10) {
+      return res.status(403).json({
+        message: "Maximum number of images for this resource was reached",
+      });
+    }
+
+    // Now create the new image
+    const newImage = await ReviewImages.create({
+      url,
+      reviewId,
+    });
+
+    res.status(201).json(newImage);
+  } catch (error) {
+    next(error);
+  }
+});
+
 /*
 ==========================================
     Create a review for a spot based on the spot's id

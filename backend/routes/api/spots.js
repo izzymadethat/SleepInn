@@ -1,6 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const { Spot, User, Booking, SpotImage, Review } = require("../../db/models");
+const {
+  Spot,
+  User,
+  Booking,
+  SpotImage,
+  Review,
+  ReviewImage,
+} = require("../../db/models");
 const bookingsRouter = require("./booking");
 const reviewsRouter = require("./reviews");
 
@@ -557,29 +564,28 @@ router.post(
 
 // edit a spot by spot id
 router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
-  const ownerId = req.user.id;
+  const spotId = req.params.spotId;
   const { address, city, state, country, lat, lng, name, description, price } =
     req.body;
+  const ownerId = req.user.id;
 
-  const spotId = req.params.spotId;
+  // 400 Status for body errors
+  // Note: we'll use express-validator to validate the request body
+  // This has been handled in "../../utils/validation.js"
 
   try {
     const spot = await Spot.findByPk(spotId);
-
     if (!spot) {
-      const err = new Error("Spot couldn't be found");
-      err.status = 404;
-      next(err);
+      return res.status(404).json({ message: "Spot couldn't be found" });
     }
 
     if (spot.ownerId !== ownerId) {
-      const err = new Error("Forbidden");
-      err.status = 403;
-      next(err);
+      return res.status(403).json({
+        message: "Forbidden",
+      });
     }
 
     await spot.update({
-      ownerId,
       address,
       city,
       state,
@@ -591,9 +597,9 @@ router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
       price,
     });
     await spot.save();
-    const formattedSpot = {
+
+    res.json({
       id: spot.id,
-      ownerId,
       address,
       city,
       state,
@@ -603,41 +609,35 @@ router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
       name,
       description,
       price,
-      createdAt: spot.createdAt,
-      updatedAt: spot.updatedAt,
-    };
-    res.status(200).json(formattedSpot);
-  } catch (e) {
-    next(e);
+    });
+  } catch (error) {
+    next(error);
   }
 });
 
-router.delete("/:spotId", requireAuth, async (req, res) => {
-  const { spotId } = req.params;
-  const userId = req.user.id;
+router.delete("/:spotId", requireAuth, async (req, res, next) => {
+  const spotId = req.params.spotId;
+  const ownerId = req.user.id;
 
   try {
     const spot = await Spot.findByPk(spotId);
-
     if (!spot) {
       return res.status(404).json({ message: "Spot couldn't be found" });
     }
 
-    if (spot.ownerId !== userId) {
+    if (spot.ownerId !== ownerId) {
       return res.status(403).json({
-        message: "Forbidden: You do not have permission to delete this spot",
+        message: "Forbidden",
       });
     }
 
-    if (spot.ownerId !== userId) {
-      return res.status(403).json({ message: "Forbidden" });
-    }
+    spot.destroy();
 
-    await spot.destroy();
-
-    return res.status(200).json({ message: "Successfully deleted" });
-  } catch (err) {
-    next(err);
+    res.status(200).json({
+      message: "Successfully deleted",
+    });
+  } catch (error) {
+    next(error);
   }
 });
 
