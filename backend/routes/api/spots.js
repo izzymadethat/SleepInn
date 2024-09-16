@@ -26,11 +26,11 @@ const validateSpot = [
   check("lat")
     .exists({ checkFalsy: true })
     .isDecimal({ min: -90, max: 90 })
-    .withMessage("Latitude must be within -90 and 90"),
+    .withMessage("Latitude is not valid"),
   check("lng")
     .exists({ checkFalsy: true })
     .isDecimal({ min: -180, max: 180 })
-    .withMessage("Longitude must be within -180 and 180"),
+    .withMessage("Longitude is not valid"),
   check("name")
     .exists({ checkFalsy: true })
     .isLength({ max: 50 })
@@ -41,7 +41,7 @@ const validateSpot = [
   check("price")
     .exists({ checkFalsy: true })
     .isDecimal({ min: 0 })
-    .withMessage("Price per day must be a positive number"),
+    .withMessage("Price per day is required"),
   handleValidationErrors,
 ];
 
@@ -255,20 +255,56 @@ router.get("/:spotId/bookings", requireAuth, async (req, res, next) => {
           {
             model: User,
             attributes: userAttributes, // only has id, firstName, lastName
-            as: "User",
           },
         ],
       });
-
-      return res.json({ Bookings: bookings });
+    } else {
+      // if the user is not the owner of the spot, only include basic details
+      bookings = await Booking.findAll({
+        where: { spotId },
+        attributes: ["spotId", "startDate", "endDate"],
+      });
     }
 
-    // if the user is not the owner of the spot, only include basic details
-    bookings = await Booking.findAll({
-      where: { spotId },
-      attributes: ["spotId", "startDate", "endDate"],
-    });
     return res.json({ Bookings: bookings });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ==========================================
+//  Get all reviews based on the spot's id
+// ==========================================
+
+router.get("/:spotId/reviews", async (req, res, next) => {
+  const spotId = req.params.spotId;
+
+  try {
+    // Check if the spot exists
+    const spot = await Spot.findByPk(spotId);
+    if (!spot) {
+      return res.status(404).json({ message: "Spot couldn't be found" });
+    }
+
+    // Find all reviews for the spot
+    const reviews = await Review.findAll({
+      where: {
+        spotId,
+      },
+      include: [
+        {
+          model: User,
+          attributes: userAttributes,
+        },
+        {
+          model: ReviewImage,
+          as: "ReviewImages",
+          attributes: imageAttributes,
+        },
+      ],
+    });
+
+    res.json({ Reviews: reviews });
   } catch (error) {
     next(error);
   }
@@ -458,6 +494,7 @@ router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
 // delete spot by spot id
 router.delete("/:spotId", requireAuth, async (req, res, next) => {
   const spotId = Number(req.params.spotId);
+  const userId = req.user.id;
 
   try {
     const spot = await Spot.findByPk(spotId);
@@ -466,12 +503,13 @@ router.delete("/:spotId", requireAuth, async (req, res, next) => {
       err.status = 404;
       return next(err);
     }
-    if (spot.ownerId !== req.user.id) {
-      const err = new Error("Forbidden");
+    if (spot.ownerId !== userId) {
+      const err = new Error("Spot must belong to the current user");
       err.status = 403;
       return next(err);
     }
-    spot.destroy();
+
+    await spot.destroy();
     res.json({ message: "Successfully deleted" });
   } catch (e) {
     next(e);

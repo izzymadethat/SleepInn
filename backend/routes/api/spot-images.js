@@ -1,47 +1,39 @@
 const express = require("express");
 const { SpotImage, Spot } = require("../../db/models");
-const { requireAuth, requireProperAuthorization } = require("../../utils/auth");
+const { requireAuth } = require("../../utils/auth");
 const router = express.Router();
 
-// delete a spot image
+// ==========================================
+//  Delete a spot image
+// ==========================================
 router.delete("/:imageId", requireAuth, async (req, res, next) => {
-  const { spotId, imageId } = req.params;
-  const uid = req.user.id;
+  const imageId = Number(req.params.imageId);
+  const userId = req.user.id;
 
   try {
-    // check if the spot exists
-    const spot = await Spot.findByPk(spotId, {
-      include: [
-        {
-          model: SpotImage,
-          where: { id: imageId },
-          required: true,
-        },
-      ],
+    // Find the SpotImage with its associated Spot
+    const image = await SpotImage.findByPk(imageId, {
+      include: {
+        model: Spot,
+        attributes: ["ownerId"],
+      },
     });
-    if (!spot) {
-      const err = new Error("Spot couldn't be found");
-      err.status = 404;
-      next(err);
-    }
 
-    // check if the user is the owner of the spot
-    if (spot.ownerId !== uid) {
-      const err = new Error("Forbidden");
-      err.status = 403;
-      next(err);
-    }
-
-    // delete the image
-    const image = await SpotImage.findByPk(imageId);
+    // Return 404 if the image doesn't exist
     if (!image) {
-      const err = new Error("Spot Image couldn't be found");
-      err.status = 404;
-      return next(err);
+      return res.status(404).json({ message: "Spot Image couldn't be found" });
     }
 
+    // Check if the current user is the owner of the spot
+    if (image.Spot.ownerId !== userId) {
+      return res
+        .status(403)
+        .json({ message: "Forbidden: You do not own this spot" });
+    }
+
+    // Delete the image
     await image.destroy();
-    res.status(200).json({ message: "Successfully deleted" });
+    return res.status(200).json({ message: "Successfully deleted" });
   } catch (error) {
     next(error);
   }

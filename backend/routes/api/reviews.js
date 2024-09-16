@@ -62,47 +62,6 @@ router.get("/current", requireAuth, async (req, res, next) => {
 
 /*
 ==========================================
-    Get all reviews based on the spot's id
-==========================================
-*/
-
-router.get("/:spotId", async (req, res, next) => {
-  const spotId = req.params.spotId;
-
-  try {
-    const reviews = await Review.findAll({
-      where: {
-        spotId,
-      },
-      include: [
-        {
-          model: User,
-          attributes: userAttributes,
-        },
-        {
-          model: ReviewImage,
-          as: "ReviewImages",
-          attributes: imageAttributes,
-        },
-      ],
-    });
-
-    // I'm not entirely checking for the reviews length to be 0 because if there are no reviews it will return an empty array.
-    // I'm checking if it even returns a length because if there are no reviews because there's no spot it will return null
-    if (!reviews.length) {
-      const err = new Error("Spot couldn't be found");
-      err.status = 404;
-      return next(err);
-    }
-
-    res.json({ Reviews: reviews });
-  } catch (error) {
-    next(error);
-  }
-});
-
-/*
-==========================================
     Create a review for a spot based on the spot's id
 ==========================================
 */
