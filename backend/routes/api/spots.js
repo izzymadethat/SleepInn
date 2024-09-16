@@ -63,27 +63,27 @@ const validateQueryParams = [
     .withMessage("Size must be greater than or equal to 1"),
   check("minLat")
     .optional({ checkFalsy: true })
-    .isDecimal({ min: -90, max: 90 })
+    .isFloat({ min: -90, max: 90 })
     .withMessage("Minimum latitude is invalid"),
   check("maxLat")
     .optional({ checkFalsy: true })
-    .isDecimal({ min: -180, max: 180 })
+    .isFloat({ min: -180, max: 180 })
     .withMessage("Maximum latitude is invalid"),
   check("minLng")
     .optional({ checkFalsy: true })
-    .isDecimal({ min: -90, max: 90 })
+    .isFloat({ min: -90, max: 90 })
     .withMessage("Minimum longitude is invalid"),
   check("maxLng")
     .optional({ checkFalsy: true })
-    .isDecimal({ min: -180, max: 180 })
+    .isFloat({ min: -180, max: 180 })
     .withMessage("Maximum longitude is invalid"),
   check("minPrice")
     .optional({ checkFalsy: true })
-    .isDecimal({ min: 0 })
+    .isFloat({ min: 0 })
     .withMessage("Minimum price must be greater than or equal to 0"),
   check("maxPrice")
     .optional({ checkFalsy: true })
-    .isDecimal({ min: 0 })
+    .isFloat({ min: 0 })
     .withMessage("Maximum price must be greater than or equal to 0"),
   handleValidationErrors,
 ];

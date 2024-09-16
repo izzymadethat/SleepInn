@@ -45,7 +45,17 @@ router.get("/current", requireAuth, async (req, res, next) => {
       include: [
         {
           model: Spot,
-          attributes: spotAttributes,
+          attributes: [ "id",
+            "ownerId",
+            "address",
+            "city",
+            "state",
+            "country",
+            "lat",
+            "lng",
+            "name",
+            "previewImage",
+            "price",],
         },
       ],
     });
@@ -139,6 +149,7 @@ router.delete("/:bookingId", requireAuth, async (req, res, next) => {
   try {
     // Find the booking
     const booking = await Booking.findByPk(bookingId);
+    //  const spot = await Spot.findByPk(booking.spotId)
 
     // Return 404 if booking not found
     if (!booking) {
@@ -146,11 +157,12 @@ router.delete("/:bookingId", requireAuth, async (req, res, next) => {
     }
 
     // Check if the booking belongs to the current user
-    if (booking.userId !== userId) {
+    if (booking.userId !== userId ) {
       return res
         .status(403)
         .json({ message: "Forbidden: Booking doesn't belong to the user" });
     }
+
 
     // Prevent deletion if the booking has already started
     const currentDate = new Date();
