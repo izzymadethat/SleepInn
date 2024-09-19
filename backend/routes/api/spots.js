@@ -111,6 +111,14 @@ const validateQueryParams = [
   handleValidationErrors,
 ];
 
+const validateSpotImage = [
+  body("url").exists({ checkFalsy: true }).withMessage("Url is required"),
+  body("preview")
+    .exists({ checkFalsy: true })
+    .isBoolean()
+    .withMessage("Preview is required"),
+];
+
 router.use("/:spotId/bookings", bookingsRouter);
 router.use("/:spotId/reviews", reviewsRouter);
 
@@ -250,7 +258,7 @@ router.get("/current", requireAuth, async (req, res, next) => {
 router.get("/:spotId", async (req, res, next) => {
   const spotId = req.params.spotId;
   try {
-    const spots = await Spot.findByPk(spotId, {
+    const spot = await Spot.findByPk(spotId, {
       attributes: {
         include: [
           [
@@ -280,7 +288,11 @@ router.get("/:spotId", async (req, res, next) => {
       ],
       group: ["Spot.id"],
     });
-    res.json(spots);
+
+    if (!spot)
+      return res.status(404).json({ message: "Spot couldn't be found" });
+
+    res.json(spot);
   } catch (error) {
     next(error);
   }
@@ -306,6 +318,27 @@ router.post("/", requireAuth, validateSpot, async (req, res, next) => {
     });
 
     res.status(201).json(newSpot);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Add an Image to a Spot based on the Spot's id
+router.post("/:spotId/images", requireAuth, async (req, res, next) => {
+  const spotId = req.params.spotId;
+  const { url, preview } = req.body;
+  try {
+    const spot = await Spot.findByPk(spotId);
+    if (!spot) {
+      return res.status(404).json({ message: "Spot couldn't be found" });
+    }
+
+    const image = await SpotImage.create({
+      spotId,
+      url,
+      preview,
+    });
+    return res.json({ id: image.id, url: image.url, preview: image.preview });
   } catch (error) {
     next(error);
   }
@@ -420,40 +453,6 @@ router.get("/:spotId/reviews", async (req, res, next) => {
     res.json({ Reviews: reviews });
   } catch (error) {
     next(error);
-  }
-});
-
-// Add image to spot based on spot id
-router.post("/:spotId/images", requireAuth, async (req, res, next) => {
-  const ownerId = req.user.id;
-  const { url, preview } = req.body;
-  const spotId = req.params.spotId;
-  try {
-    const spot = await Spot.findByPk(spotId);
-
-    if (!spot) {
-      const err = new Error("Spot couldn't be found");
-      err.status = 404;
-      next(err);
-    }
-    if (spot.ownerId !== ownerId) {
-      const err = new Error("Forbidden");
-      err.status = 403;
-      next(err);
-    }
-    const newImage = await SpotImage.create({
-      spotId,
-      url,
-      preview,
-    });
-    const formattedImage = {
-      id: newImage.id,
-      url: newImage.url,
-      preview: newImage.preview,
-    };
-    res.status(201).json(formattedImage);
-  } catch (e) {
-    next(e);
   }
 });
 
