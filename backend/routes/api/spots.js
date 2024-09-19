@@ -55,10 +55,12 @@ const validateSpot = [
 
 const validateQueryParams = [
   query("page")
+    .optional()
     .isInt({ min: 1 })
     .withMessage("Page must be greater than or equal to 1")
     .toInt(10),
   query("size")
+    .optional()
     .isInt({ min: 1, max: 20 })
     .withMessage("Size must be between 1 and 20")
     .toInt(10),
@@ -114,8 +116,8 @@ router.get("/", validateQueryParams, async (req, res, next) => {
   let { page, size, minLat, maxLat, minLng, maxLng, minPrice, maxPrice } =
     req.query;
 
-  const limit = size;
-  const offset = (page - 1) * size;
+  const limit = size ?? 20;
+  const offset = page ? (page - 1) * size : 0;
   const where = {};
 
   if (minLat !== undefined && maxLat !== undefined) {
@@ -160,8 +162,6 @@ router.get("/", validateQueryParams, async (req, res, next) => {
     };
   }
 
-  console.log(where);
-
   try {
     const spots = await Spot.findAll({
       where,
@@ -195,10 +195,9 @@ router.get("/", validateQueryParams, async (req, res, next) => {
 });
 
 // get all spots by owner id
-// correction: get all spots of the *CURRENT USER*
-// route should be /api/spots/current
 router.get("/current", requireAuth, async (req, res, next) => {
   const ownerId = req.user.id; // comes from the middleware to add user to req
+
   try {
     const allSpots = await Spot.findAll({
       where: { ownerId },
