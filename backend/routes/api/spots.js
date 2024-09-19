@@ -13,7 +13,7 @@ const reviewsRouter = require("./reviews");
 
 const { requireAuth } = require("../../utils/auth");
 const { Op, fn, col, Sequelize } = require("sequelize");
-const { check, query, bodybody } = require("express-validator");
+const { check, query, body } = require("express-validator");
 query;
 const { handleValidationErrors } = require("../../utils/validation");
 const {
@@ -25,8 +25,8 @@ const {
 const validateSpot = [
   body("address")
     .exists({ checkFalsy: true })
-    .withMessage("Street address is required"), // 400
-  body("city").exists({ checkFalsy: true }).withMessage("City is required"), // 400
+    .withMessage("Street address is required"),
+  body("city").exists({ checkFalsy: true }).withMessage("City is required"),
   body("state").exists({ checkFalsy: true }).withMessage("State is required"), // 400
   body("country")
     .exists({ checkFalsy: true })
@@ -34,11 +34,13 @@ const validateSpot = [
   body("lat")
     .exists({ checkFalsy: true })
     .isFloat({ min: -90, max: 90 })
-    .withMessage("Latitude is not valid"),
+    .withMessage("Latitude must be within -90 and 90")
+    .toFloat(),
   body("lng")
     .exists({ checkFalsy: true })
     .isFloat({ min: -180, max: 180 })
-    .withMessage("Longitude is not valid"),
+    .withMessage("Longitude must be within -180 and 180")
+    .toFloat(),
   body("name")
     .exists({ checkFalsy: true })
     .isLength({ max: 50 })
@@ -49,7 +51,8 @@ const validateSpot = [
   body("price")
     .exists({ checkFalsy: true })
     .isFloat({ gt: 0 })
-    .withMessage("Price per day is required"),
+    .withMessage("Price per day must be a positive number")
+    .toInt(10),
   handleValidationErrors,
 ];
 
@@ -283,6 +286,31 @@ router.get("/:spotId", async (req, res, next) => {
   }
 });
 
+// Create a Spot
+router.post("/", requireAuth, validateSpot, async (req, res, next) => {
+  const ownerId = req.user.id;
+  const { address, city, state, country, lat, lng, name, description, price } =
+    req.body;
+  try {
+    const newSpot = await Spot.create({
+      ownerId,
+      address,
+      city,
+      state,
+      country,
+      lat,
+      lng,
+      name,
+      description,
+      price,
+    });
+
+    res.status(201).json(newSpot);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // get all bookings for a spot based on spot id
 router.get("/:spotId/bookings", requireAuth, async (req, res, next) => {
   const spotId = req.params.spotId;
@@ -392,96 +420,6 @@ router.get("/:spotId/reviews", async (req, res, next) => {
     res.json({ Reviews: reviews });
   } catch (error) {
     next(error);
-  }
-});
-
-// create a spot
-router.post("/", requireAuth, async (req, res, next) => {
-  const ownerId = req.user.id;
-  const { address, city, state, country, lat, lng, name, description, price } =
-    req.body;
-
-  // Validation errors object
-  let errors = {};
-
-  // Required fields validation
-  if (!address) errors.address = "Street address is required";
-  if (!city) errors.city = "City is required";
-  if (!state) errors.state = "State is required";
-  if (!country) errors.country = "Country is required";
-
-  // Latitude validation (must be between -90 and 90)
-  if (lat === undefined || lat < -90 || lat > 90) {
-    errors.lat = "Latitude must be within -90 and 90";
-  }
-
-  // Longitude validation (must be between -180 and 180)
-  if (lng === undefined || lng < -180 || lng > 180) {
-    errors.lng = "Longitude must be within -180 and 180";
-  }
-
-  // Name validation (must be less than 50 characters)
-  if (!name || name.length > 50) {
-    errors.name = "Name must be less than 50 characters";
-  }
-
-  // Description validation (must not be empty)
-  if (!description) {
-    errors.description = "Description is required";
-  }
-
-  // Price validation (must be a positive number)
-  if (price === undefined || price <= 0) {
-    errors.price = "Price per day must be a positive number";
-  }
-
-  // If there are validation errors, return a 400 response with the errors
-  if (Object.keys(errors).length > 0) {
-    return res.status(400).json({
-      message: "Validation Error",
-      errors,
-    });
-  }
-
-  try {
-    const spot = await Spot.create({
-      ownerId,
-      address,
-      city,
-      state,
-      country,
-      lat,
-      lng,
-      name,
-      description,
-      price,
-    });
-    if (!spot) {
-      const err = new Error("Spot couldn't be created");
-      err.status = 404;
-      return next(err);
-    }
-
-    const formattedSpot = {
-      id: spot.id,
-      ownerId: spot.ownerId,
-      address: spot.address,
-      city: spot.city,
-      state: spot.state,
-      country: spot.country,
-      lat: spot.lat,
-      lng: spot.lng,
-      name: spot.name,
-      description: spot.description,
-      price: spot.price,
-      createdAt: spot.createdAt,
-      updatedAt: spot.updatedAt,
-    };
-
-    // Send the response with status 201 Created
-    res.status(201).json(formattedSpot);
-  } catch (e) {
-    next(e);
   }
 });
 
