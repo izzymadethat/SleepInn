@@ -45,7 +45,8 @@ router.get("/current", requireAuth, async (req, res, next) => {
       include: [
         {
           model: Spot,
-          attributes: [ "id",
+          attributes: [
+            "id",
             "ownerId",
             "address",
             "city",
@@ -55,7 +56,8 @@ router.get("/current", requireAuth, async (req, res, next) => {
             "lng",
             "name",
             "previewImage",
-            "price",],
+            "price",
+          ],
         },
       ],
     });
@@ -142,41 +144,42 @@ router.put("/:bookingId", requireAuth, async (req, res, next) => {
 // ==========================================
 //  Delete a booking
 // ==========================================
-router.delete("/:bookingId", requireAuth, async (req, res, next) => {
+router.delete("/:bookingId", requireAuth, async (req, res) => {
+  const { bookingId } = req.params;
   const userId = req.user.id;
-  const bookingId = req.params.bookingId;
 
   try {
-    // Find the booking
-    const booking = await Booking.findByPk(bookingId);
-    //  const spot = await Spot.findByPk(booking.spotId)
+    const booking = await Booking.findOne({
+      where: { id: bookingId },
+      include: {
+        model: Spot,
+        attributes: ["ownerId"],
+      },
+    });
 
-    // Return 404 if booking not found
     if (!booking) {
       return res.status(404).json({ message: "Booking couldn't be found" });
     }
 
-    // Check if the booking belongs to the current user
-    if (booking.userId !== userId ) {
-      return res
-        .status(403)
-        .json({ message: "Forbidden: Booking doesn't belong to the user" });
+    if (booking.userId !== userId && booking.Spot.ownerId !== userId) {
+      return res.status(403).json({ message: "Forbidden" });
     }
 
-
-    // Prevent deletion if the booking has already started
-    const currentDate = new Date();
-    if (currentDate >= new Date(booking.startDate)) {
+    const today = new Date();
+    if (new Date(booking.startDate) <= today) {
       return res
         .status(403)
-        .json({ message: "Bookings that have started can't be deleted" });
+        .json({ message: "Bookings that have been started can't be deleted" });
     }
 
-    // Delete the booking
     await booking.destroy();
+
     return res.status(200).json({ message: "Successfully deleted" });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    return res.status(500).json({
+      message: "Did not delete booking",
+      error: err.message,
+    });
   }
 });
 

@@ -101,7 +101,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
       });
     }
 
-    const reviewImages = ReviewImage.findAll({
+    const reviewImages = await ReviewImage.findAll({
       where: { reviewId },
     });
 

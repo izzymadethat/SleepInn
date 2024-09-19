@@ -9,56 +9,56 @@ const { imageAttributes } = require("../../utils/attributes");
     Add an image to a review based on the review's id
 ==========================================
 */
-router.post("/", requireAuth, async (req, res, next) => {
-  const reviewId = req.params.reviewId;
-  const uid = req.user.id;
+router.post("/:reviewId/images", requireAuth, async (req, res) => {
+  const { reviewId } = req.params;
   const { url } = req.body;
+  const userId = req.user.id;
 
   try {
-    // check if review exists
-    const existingReview = await Review.findByPk(reviewId, {
-      include: [
-        {
-          model: ReviewImage,
-          attributes: imageAttributes,
-        },
-      ],
-    });
+    // Find the review by reviewId and check if it belongs to the current user
+    const review = await Review.findByPk(reviewId);
 
-    // send 404 if review doesn't exist
-    if (!existingReview) {
-      const err = new Error("Review couldn't be found");
-      err.status = 404;
-      return next(err);
+    // If the review doesn't exist
+    if (!review) {
+      return res.status(404).json({ message: "Review couldn't be found" });
+    }
+    // check if the current user is the owner of the review
+    if (review.userId !== userId) {
+      return res
+        .status(403)
+        .json({
+          message:
+            "Forbidden: You do not have permission to add images to this review",
+        });
     }
 
-    //   check if review belongs to user
-    if (existingReview.userId !== uid) {
-      const err = new Error("Forbidden");
-      err.status = 403;
-      return next(err);
+    // Check if the review already has 10 images
+    const imageCount = await ReviewImage.count({ where: { reviewId } });
+
+    if (imageCount >= 10) {
+      return res.status(403).json({
+        message: "Maximum number of images for this resource was reached",
+      });
     }
 
-    // check if maxed images - max of 10
-    if (existingReview.Images.length >= 10) {
-      const err = new Error(
-        "Maximum number of images for this resource was reached"
-      );
-      err.status = 403;
-      return next(err);
-    }
-
+    // Create a new review image
     const newImage = await ReviewImage.create({
+      reviewId: review.id,
       url,
-      reviewId,
     });
 
-    return res.status(201).json({
+    // Return the newly created image
+    const formattedImage = {
       id: newImage.id,
       url: newImage.url,
+    };
+
+    res.status(201).json(formattedImage);
+  } catch (err) {
+    return res.status(500).json({
+      message: "Failed to add image",
+      error: err.message,
     });
-  } catch (error) {
-    next(error);
   }
 });
 
