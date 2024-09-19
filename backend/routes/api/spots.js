@@ -13,7 +13,7 @@ const reviewsRouter = require("./reviews");
 
 const { requireAuth } = require("../../utils/auth");
 const { Op, fn, col, Sequelize } = require("sequelize");
-const { check, query } = require("express-validator");
+const { check, query, bodybody } = require("express-validator");
 query;
 const { handleValidationErrors } = require("../../utils/validation");
 const {
@@ -23,30 +23,30 @@ const {
 } = require("../../utils/attributes");
 
 const validateSpot = [
-  check("address")
+  body("address")
     .exists({ checkFalsy: true })
     .withMessage("Street address is required"), // 400
-  check("city").exists({ checkFalsy: true }).withMessage("City is required"), // 400
-  check("state").exists({ checkFalsy: true }).withMessage("State is required"), // 400
-  check("country")
+  body("city").exists({ checkFalsy: true }).withMessage("City is required"), // 400
+  body("state").exists({ checkFalsy: true }).withMessage("State is required"), // 400
+  body("country")
     .exists({ checkFalsy: true })
     .withMessage("Country is required"), // 400
-  check("lat")
+  body("lat")
     .exists({ checkFalsy: true })
     .isFloat({ min: -90, max: 90 })
     .withMessage("Latitude is not valid"),
-  check("lng")
+  body("lng")
     .exists({ checkFalsy: true })
     .isFloat({ min: -180, max: 180 })
     .withMessage("Longitude is not valid"),
-  check("name")
+  body("name")
     .exists({ checkFalsy: true })
     .isLength({ max: 50 })
     .withMessage("Name must be less than 50 characters"),
-  check("description")
+  body("description")
     .exists({ checkFalsy: true })
     .withMessage("Description is required"),
-  check("price")
+  body("price")
     .exists({ checkFalsy: true })
     .isFloat({ gt: 0 })
     .withMessage("Price per day is required"),
@@ -111,7 +111,7 @@ const validateQueryParams = [
 router.use("/:spotId/bookings", bookingsRouter);
 router.use("/:spotId/reviews", reviewsRouter);
 
-// get all spots
+// Get all Spots
 router.get("/", validateQueryParams, async (req, res, next) => {
   let { page, size, minLat, maxLat, minLng, maxLng, minPrice, maxPrice } =
     req.query;
@@ -177,11 +177,22 @@ router.get("/", validateQueryParams, async (req, res, next) => {
           ),
           "avgRating",
         ],
+        [
+          sequelize.literal(
+            `(SELECT "url" FROM "SpotImages" WHERE "SpotImages"."spotId" = "Spot"."id" AND "SpotImages"."preview" = true LIMIT 1)`
+          ),
+          "previewImage",
+        ],
+        // for some reason, had to add like this
       ],
 
       include: [
         {
           model: Review,
+          attributes: [],
+        },
+        {
+          model: SpotImage,
           attributes: [],
         },
       ],
@@ -194,17 +205,23 @@ router.get("/", validateQueryParams, async (req, res, next) => {
   }
 });
 
-// get all spots by owner id
+// Get all Spots owned by the Current User
 router.get("/current", requireAuth, async (req, res, next) => {
   const ownerId = req.user.id; // comes from the middleware to add user to req
 
   try {
-    const allSpots = await Spot.findAll({
+    const spots = await Spot.findAll({
       where: { ownerId },
       attributes: {
         include: [
           // Calculate average rating
           [Sequelize.fn("AVG", col("Reviews.stars")), "avgRating"],
+          [
+            sequelize.literal(
+              `(SELECT "url" FROM "SpotImages" WHERE "SpotImages"."spotId" = "Spot"."id" AND "SpotImages"."preview" = true LIMIT 1)`
+            ),
+            "previewImage",
+          ],
         ],
       },
       include: [
@@ -220,80 +237,49 @@ router.get("/current", requireAuth, async (req, res, next) => {
       group: ["Spot.id"], // Group by spot ID to get aggregate values per spot
     });
 
-    res.json({ spots: allSpots });
-  } catch (e) {
-    next(e);
+    res.json({ Spots: spots });
+  } catch (error) {
+    next(error);
   }
 });
 
-// get a single spot
+// Get details of a Spot from an id
 router.get("/:spotId", async (req, res, next) => {
   const spotId = req.params.spotId;
-  let avgStarRating;
-  const numReviews = await Review.count({
-    where: { spotId },
-  });
-
-  const reviews = await Review.findAll({
-    where: { spotId },
-    attributes: ["stars"],
-  });
-
-  if (reviews.length > 0) {
-    const totalStars = reviews.reduce((acc, review) => acc + review.stars, 0);
-    avgStarRating = totalStars / numReviews;
-  } else {
-    // Handle case where there are no reviews
-    avgStarRating = 0;
-  }
-
   try {
-    const preSpot = await Spot.findByPk(spotId, {
-      attributes: spotAttributes,
+    const spots = await Spot.findByPk(spotId, {
+      attributes: {
+        include: [
+          [
+            sequelize.literal(
+              `(SELECT AVG("stars") FROM "Reviews" WHERE "Reviews"."spotId" = "Spot"."id")`
+            ),
+            "avgStarRating",
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT("id") FROM "Reviews" WHERE "Reviews"."spotId" = "Spot"."id")`
+            ),
+            "numReviews",
+          ],
+        ],
+      },
       include: [
         {
           model: User,
-          attributes: userAttributes, // only has id, firstName, lastName
           as: "Owner",
+          attributes: userAttributes,
         },
         {
           model: SpotImage,
-          attributes: imageAttributes,
-          as: "SpotImages",
+          attributes: [...imageAttributes, "preview"],
         },
       ],
+      group: ["Spot.id"],
     });
-    // preSpot.avgRating = avgStarRating;
-
-    if (!preSpot) {
-      //spot not found
-      const err = new Error("Spot couldn't be found");
-      err.status = 404;
-      return next(err);
-    }
-    const spotResult = {
-      id: preSpot.id,
-      ownerId: preSpot.ownerId,
-      address: preSpot.address,
-      city: preSpot.city,
-      state: preSpot.state,
-      country: preSpot.country,
-      lat: preSpot.lat,
-      lng: preSpot.lng,
-      name: preSpot.name,
-      description: preSpot.description,
-      price: preSpot.price,
-      createdAt: preSpot.createdAt,
-      updatedAt: preSpot.updatedAt,
-      numReviews,
-      avgStarRating,
-      SpotImages: preSpot.SpotImages,
-      Owner: preSpot.Owner,
-    };
-
-    res.json(spotResult);
-  } catch (e) {
-    next(e);
+    res.json(spots);
+  } catch (error) {
+    next(error);
   }
 });
 
