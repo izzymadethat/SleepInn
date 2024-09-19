@@ -1,5 +1,4 @@
-const express = require("express");
-const router = express.Router();
+const router = require("express").Router();
 const {
   Spot,
   User,
@@ -7,13 +6,15 @@ const {
   SpotImage,
   Review,
   ReviewImage,
+  sequelize,
 } = require("../../db/models");
 const bookingsRouter = require("./booking");
 const reviewsRouter = require("./reviews");
 
 const { requireAuth } = require("../../utils/auth");
-const { Op } = require("sequelize");
-const { check } = require("express-validator");
+const { Op, fn, col, Sequelize } = require("sequelize");
+const { check, query } = require("express-validator");
+query;
 const { handleValidationErrors } = require("../../utils/validation");
 const {
   userAttributes,
@@ -53,62 +54,55 @@ const validateSpot = [
 ];
 
 const validateQueryParams = [
-  check("page")
-    .optional({ checkFalsy: true })
+  query("page")
     .isInt({ min: 1 })
-    .withMessage("Page must be greater than or equal to 1"),
-  check("size")
-    .optional({ checkFalsy: true })
+    .withMessage("Page must be greater than or equal to 1")
+    .toInt(10),
+  query("size")
     .isInt({ min: 1, max: 20 })
-    .withMessage("Size must be greater than or equal to 1"),
-  check("minLat")
-    .optional({ checkFalsy: true })
+    .withMessage("Size must be between 1 and 20")
+    .toInt(10),
+  query("minLat")
+    .optional()
     .isFloat({ min: -90, max: 90 })
-    .withMessage("Minimum latitude is invalid"),
-  check("maxLat")
-    .optional({ checkFalsy: true })
-    .isFloat({ min: -180, max: 180 })
-    .withMessage("Maximum latitude is invalid"),
-  check("minLng")
-    .optional({ checkFalsy: true })
+    .withMessage("Minimum latitude is invalid")
+    .toFloat(),
+  query("maxLat")
+    .optional()
     .isFloat({ min: -90, max: 90 })
-    .withMessage("Minimum longitude is invalid"),
-  check("maxLng")
-    .optional({ checkFalsy: true })
+    .withMessage("Maximum latitude is invalid")
+    .toFloat(),
+  query("minLng")
+    .optional()
     .isFloat({ min: -180, max: 180 })
-    .withMessage("Maximum longitude is invalid"),
-  check("minPrice")
-    .optional({ checkFalsy: true })
+    .withMessage("Minimum longitude is invalid")
+    .toFloat(),
+  query("maxLng")
+    .optional()
+    .isFloat({ min: -180, max: 180 })
+    .withMessage("Maximum longitude is invalid")
+    .toFloat(),
+  query("minPrice")
+    .optional()
     .isFloat({ min: 0 })
-    .withMessage("Minimum price must be greater than or equal to 0"),
-  check("maxPrice")
-    .optional({ checkFalsy: true })
+    .withMessage("Minimum price must be greater than or equal to 0")
+    .toFloat(),
+  query("maxPrice")
+    .optional()
     .isFloat({ min: 0 })
-    .withMessage("Maximum price must be greater than or equal to 0"),
-  handleValidationErrors,
-];
-
-const validateBooking = [
-  check("startDate")
-    .exists({ checkFalsy: true })
+    .withMessage("Maximum price must be greater than or equal to 0")
+    // check if max less than minPrice
     .custom((value, { req }) => {
-      const today = new Date();
-      const start = new Date(value);
-      if (start < today) {
-        throw new Error("startDate cannot be in the past");
+      const minPrice = parseFloat(req.query.minPrice);
+      const maxPrice = parseFloat(value);
+      if (!isNaN(minPrice) && maxPrice < minPrice) {
+        throw new Error(
+          "Maximum price must be greater than or equal to minimum price"
+        );
       }
       return true;
-    }),
-  check("endDate")
-    .exists({ checkFalsy: true })
-    .custom((value, { req }) => {
-      const start = new Date(req.body.startDate);
-      const end = new Date(value);
-      if (end <= start) {
-        throw new Error("End date cannot be on or before start date");
-      }
-      return true;
-    }),
+    })
+    .toFloat(),
   handleValidationErrors,
 ];
 
@@ -116,104 +110,88 @@ router.use("/:spotId/bookings", bookingsRouter);
 router.use("/:spotId/reviews", reviewsRouter);
 
 // get all spots
-router.get("/", async (req, res) => {
+router.get("/", validateQueryParams, async (req, res, next) => {
   let { page, size, minLat, maxLat, minLng, maxLng, minPrice, maxPrice } =
     req.query;
 
-  // Convert query parameters to proper types
-  page = parseInt(page) || 1; // Default to 1 if invalid or not provided
-  size = parseInt(size) || 20; // Default to 20 if invalid or not provided
-  minLat = minLat !== undefined ? parseFloat(minLat) : undefined;
-  maxLat = maxLat !== undefined ? parseFloat(maxLat) : undefined;
-  minLng = minLng !== undefined ? parseFloat(minLng) : undefined;
-  maxLng = maxLng !== undefined ? parseFloat(maxLng) : undefined;
-  minPrice = minPrice !== undefined ? parseFloat(minPrice) : undefined;
-  maxPrice = maxPrice !== undefined ? parseFloat(maxPrice) : undefined;
+  const limit = size;
+  const offset = (page - 1) * size;
+  const where = {};
 
-  // Validation
-  const errors = {};
-  if (isNaN(page) || page < 1)
-    errors.page = "Page must be greater than or equal to 1";
-  if (isNaN(size) || size < 1 || size > 20)
-    errors.size = "Size must be between 1 and 20";
-  if (minLat !== undefined && (isNaN(minLat) || minLat < -90 || minLat > 90))
-    errors.minLat = "Minimum latitude is invalid";
-  if (maxLat !== undefined && (isNaN(maxLat) || maxLat < -90 || maxLat > 90))
-    errors.maxLat = "Maximum latitude is invalid";
-  if (minLng !== undefined && (isNaN(minLng) || minLng < -180 || minLng > 180))
-    errors.minLng = "Minimum longitude is invalid";
-  if (maxLng !== undefined && (isNaN(maxLng) || maxLng < -180 || maxLng > 180))
-    errors.maxLng = "Maximum longitude is invalid";
-  if (minPrice !== undefined && (isNaN(minPrice) || minPrice < 0))
-    errors.minPrice = "Minimum price must be greater than or equal to 0";
-  if (maxPrice !== undefined && (isNaN(maxPrice) || maxPrice < 0))
-    errors.maxPrice = "Maximum price must be greater than or equal to 0";
-
-  // If there are errors, respond with a 400 status
-  if (Object.keys(errors).length > 0) {
-    return res.status(400).json({
-      message: "Bad Request",
-      errors,
-    });
+  if (minLat !== undefined && maxLat !== undefined) {
+    where.lat = {
+      [Op.between]: [minLat, maxLat],
+    };
+  } else if (minLat !== undefined) {
+    where.lat = {
+      [Op.gte]: minLat,
+    };
+  } else if (maxLat !== undefined) {
+    where.lat = {
+      [Op.lte]: maxLat,
+    };
   }
 
-  const spots = await Spot.findAll({
-    where: {
-      lat: { [Op.between]: [minLat || -90, maxLat || 90] },
-      lng: { [Op.between]: [minLng || -180, maxLng || 180] },
-      price: {
-        [Op.between]: [minPrice || 0, maxPrice || Number.MAX_SAFE_INTEGER],
-      },
-    },
-    limit: size,
-    offset: (page - 1) * size,
-    include: [
-      {
-        model: SpotImage,
-        attributes: ["url", "preview"],
-      },
-      {
-        model: Review,
-        attributes: ["stars"],
-        required: false,
-      },
-    ],
-  });
+  if (minLng !== undefined && maxLng !== undefined) {
+    where.lng = {
+      [Op.between]: [minLng, maxLng],
+    };
+  } else if (minLng !== undefined) {
+    where.lng = {
+      [Op.gte]: minLng,
+    };
+  } else if (maxLng !== undefined) {
+    where.lng = {
+      [Op.lte]: maxLng,
+    };
+  }
 
-  let spotsList = spots.map((spot) => spot.toJSON());
+  if (minPrice !== undefined && maxPrice !== undefined) {
+    where.price = {
+      [Op.between]: [minPrice, maxPrice],
+    };
+  } else if (minPrice !== undefined) {
+    where.price = {
+      [Op.gte]: minPrice,
+    };
+  } else if (maxPrice !== undefined) {
+    where.price = {
+      [Op.lte]: maxPrice,
+    };
+  }
 
-  // Process each spot to include avgRating and previewImage
-  spotsList.forEach((spot) => {
-    // Calculate average rating
-    let totalStars = 0;
-    let reviewCount = 0;
-    spot.Reviews.forEach((review) => {
-      totalStars += review.stars;
-      reviewCount++;
+  console.log(where);
+
+  try {
+    const spots = await Spot.findAll({
+      where,
+      limit,
+      offset,
+      attributes: [
+        ...spotAttributes,
+        "createdAt",
+        "updatedAt",
+        [
+          sequelize.literal(
+            '(SELECT AVG("stars") FROM "Reviews" WHERE "Reviews"."spotId" = "Spot"."id")'
+          ),
+          "avgRating",
+        ],
+      ],
+
+      include: [
+        {
+          model: Review,
+          attributes: [],
+        },
+      ],
+      group: ["Spot.id"],
     });
 
-    if (reviewCount > 0) {
-      spot.avgRating = parseFloat((totalStars / reviewCount).toFixed(1));
-    } else {
-      spot.avgRating = null;
-    }
-    delete spot.Reviews; // Remove Reviews after processing avgRating
-
-    // Calculate preview image
-    spot.SpotImages.forEach((image) => {
-      if (image.preview === true) {
-        spot.previewImage = image.url;
-      }
-    });
-    if (!spot.previewImage) {
-      spot.previewImage = "No preview image available";
-    }
-    delete spot.SpotImages; // Remove SpotImages after processing previewImage
-
-    return spot;
-  });
-
-  res.json({ Spots: spotsList, page, size });
+    res.json({ Spots: spots, page, size });
+  } catch (error) {
+    next(error);
+  }
 });
 
 // get all spots by owner id
@@ -224,6 +202,23 @@ router.get("/current", requireAuth, async (req, res, next) => {
   try {
     const allSpots = await Spot.findAll({
       where: { ownerId },
+      attributes: {
+        include: [
+          // Calculate average rating
+          [Sequelize.fn("AVG", col("Reviews.stars")), "avgRating"],
+        ],
+      },
+      include: [
+        {
+          model: Review,
+          attributes: [], // We don't need to include Review attributes in the result
+        },
+        {
+          model: SpotImage,
+          attributes: [], // We don't need to include SpotImage attributes in the result
+        },
+      ],
+      group: ["Spot.id"], // Group by spot ID to get aggregate values per spot
     });
 
     res.json({ spots: allSpots });
