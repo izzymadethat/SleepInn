@@ -84,8 +84,6 @@ module.exports = (sequelize, DataTypes) => {
           min: 0,
         },
       },
-      avgRating: DataTypes.FLOAT,
-      previewImage: DataTypes.STRING,
     },
     {
       sequelize,
