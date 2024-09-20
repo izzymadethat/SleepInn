@@ -326,6 +326,7 @@ router.post("/", requireAuth, validateSpot, async (req, res, next) => {
 // Add an Image to a Spot based on the Spot's id
 router.post("/:spotId/images", requireAuth, async (req, res, next) => {
   const spotId = req.params.spotId;
+  const userId = req.user.id;
   const { url, preview } = req.body;
   try {
     const spot = await Spot.findByPk(spotId);
@@ -333,54 +334,97 @@ router.post("/:spotId/images", requireAuth, async (req, res, next) => {
       return res.status(404).json({ message: "Spot couldn't be found" });
     }
 
+    if (spot.ownerId !== userId) {
+      return res.status(403).json({
+        message: "Forbidden: Spot does not belong to user",
+      });
+    }
+
     const image = await SpotImage.create({
       spotId,
       url,
       preview,
     });
+
     return res.json({ id: image.id, url: image.url, preview: image.preview });
   } catch (error) {
     next(error);
   }
 });
 
-// get all bookings for a spot based on spot id
-router.get("/:spotId/bookings", requireAuth, async (req, res, next) => {
+// Edit a Spot
+router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
   const spotId = req.params.spotId;
-  const uid = req.user.id;
+  const { address, city, state, country, lat, lng, name, description, price } =
+    req.body;
+  const ownerId = req.user.id;
 
   try {
     const spot = await Spot.findByPk(spotId);
+
     if (!spot) {
-      const err = new Error("Spot couldn't be found");
-      err.status = 404;
-      return next(err);
+      return res.status(404).json({ message: "Spot couldn't be found" });
     }
-    // is the user the owner of the spot?
-    const isOwner = spot.ownerId === uid;
 
-    let bookings;
-
-    // if the user is the owner of the spot, include all details
-    if (isOwner) {
-      bookings = await Booking.findAll({
-        where: { spotId },
-        include: [
-          {
-            model: User,
-            attributes: userAttributes, // only has id, firstName, lastName
-          },
-        ],
-      });
-    } else {
-      // if the user is not the owner of the spot, only include basic details
-      bookings = await Booking.findAll({
-        where: { spotId },
-        attributes: ["spotId", "startDate", "endDate"],
+    if (spot.ownerId !== ownerId) {
+      return res.status(403).json({
+        message: "Forbidden: Spot does not belong to user",
       });
     }
 
-    return res.json({ Bookings: bookings });
+    await spot.update({
+      address,
+      city,
+      state,
+      country,
+      lat,
+      lng,
+      name,
+      description,
+      price,
+    });
+    await spot.save();
+
+    res.json({
+      id: spot.id,
+      address,
+      city,
+      state,
+      country,
+      lat,
+      lng,
+      name,
+      description,
+      price,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Delete a Spot
+router.delete("/:spotId", requireAuth, async (req, res, next) => {
+  const spotId = req.params.spotId;
+  const ownerId = req.user.id;
+
+  try {
+    const spot = await Spot.findByPk(spotId);
+
+    if (!spot) {
+      return res.status(404).json({ message: "Spot couldn't be found" });
+    }
+
+    if (spot.ownerId !== ownerId) {
+      return res.status(403).json({
+        message: "Forbidden: Spot does not belong to user",
+      });
+    }
+
+    spot.destroy();
+
+    res.status(200).json({
+      message: "Successfully deleted",
+    });
   } catch (error) {
     next(error);
   }
@@ -456,6 +500,46 @@ router.get("/:spotId/reviews", async (req, res, next) => {
   }
 });
 
+// get all bookings for a spot based on spot id
+router.get("/:spotId/bookings", requireAuth, async (req, res, next) => {
+  const spotId = req.params.spotId;
+  const uid = req.user.id;
+
+  try {
+    const spot = await Spot.findByPk(spotId);
+    if (!spot) {
+      return res.status(404).json({ message: "Spot couldn't be found" });
+    }
+    // is the user the owner of the spot?
+    const isOwner = spot.ownerId === uid;
+
+    let bookings;
+
+    // if the user is the owner of the spot, include all details
+    if (isOwner) {
+      bookings = await Booking.findAll({
+        where: { spotId },
+        include: [
+          {
+            model: User,
+            attributes: userAttributes, // only has id, firstName, lastName
+          },
+        ],
+      });
+    } else {
+      // if the user is not the owner of the spot, only include basic details
+      bookings = await Booking.findAll({
+        where: { spotId },
+        attributes: ["spotId", "startDate", "endDate"],
+      });
+    }
+
+    return res.json({ Bookings: bookings });
+  } catch (error) {
+    next(error);
+  }
+});
+
 // ==========================================
 //  Create a booking for a spot based on spot id
 // ==========================================
@@ -509,10 +593,10 @@ router.post("/:spotId/bookings", requireAuth, async (req, res) => {
     const errors = {};
 
     if (startDateOnly < todayDateOnly) {
-      errors.startDate = "startDate cannot be in the past";
+      errors.startDate = "Start Date cannot be in the past";
     }
     if (endDateOnly <= startDateOnly) {
-      errors.endDate = "endDate cannot be on or before startDate";
+      errors.endDate = "End Date cannot be on or before startDate";
     }
 
     if (Object.keys(errors).length > 0) {
@@ -577,85 +661,6 @@ router.post("/:spotId/bookings", requireAuth, async (req, res) => {
       message: "Internal Server Error",
       error: error.message,
     });
-  }
-});
-
-// edit a spot by spot id
-router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
-  const spotId = req.params.spotId;
-  const { address, city, state, country, lat, lng, name, description, price } =
-    req.body;
-  const ownerId = req.user.id;
-
-  // 400 Status for body errors
-  // Note: we'll use express-validator to validate the request body
-  // This has been handled in "../../utils/validation.js"
-
-  try {
-    const spot = await Spot.findByPk(spotId);
-    if (!spot) {
-      return res.status(404).json({ message: "Spot couldn't be found" });
-    }
-
-    if (spot.ownerId !== ownerId) {
-      return res.status(403).json({
-        message: "Forbidden",
-      });
-    }
-
-    await spot.update({
-      address,
-      city,
-      state,
-      country,
-      lat,
-      lng,
-      name,
-      description,
-      price,
-    });
-    await spot.save();
-
-    res.json({
-      id: spot.id,
-      address,
-      city,
-      state,
-      country,
-      lat,
-      lng,
-      name,
-      description,
-      price,
-    });
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.delete("/:spotId", requireAuth, async (req, res, next) => {
-  const spotId = req.params.spotId;
-  const ownerId = req.user.id;
-
-  try {
-    const spot = await Spot.findByPk(spotId);
-    if (!spot) {
-      return res.status(404).json({ message: "Spot couldn't be found" });
-    }
-
-    if (spot.ownerId !== ownerId) {
-      return res.status(403).json({
-        message: "Forbidden",
-      });
-    }
-
-    spot.destroy();
-
-    res.status(200).json({
-      message: "Successfully deleted",
-    });
-  } catch (error) {
-    next(error);
   }
 });
 

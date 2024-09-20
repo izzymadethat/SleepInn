@@ -4,7 +4,7 @@ const { Booking, Spot } = require("../../db/models");
 const { check } = require("express-validator");
 const { spotAttributes } = require("../../utils/attributes");
 const { handleValidationErrors } = require("../../utils/validation");
-const { Op } = require("sequelize");
+const { Op, Sequelize } = require("sequelize");
 
 const validateBooking = [
   check("startDate")
@@ -46,17 +46,13 @@ router.get("/current", requireAuth, async (req, res, next) => {
         {
           model: Spot,
           attributes: [
-            "id",
-            "ownerId",
-            "address",
-            "city",
-            "state",
-            "country",
-            "lat",
-            "lng",
-            "name",
-            "previewImage",
-            "price",
+            ...spotAttributes,
+            [
+              Sequelize.literal(
+                `(SELECT "url" FROM "SpotImages" WHERE "SpotImages"."spotId" = "Spot"."id" AND "SpotImages"."preview" = true LIMIT 1)`
+              ),
+              "previewImage",
+            ],
           ],
         },
       ],
@@ -75,6 +71,7 @@ router.get("/current", requireAuth, async (req, res, next) => {
 router.put("/:bookingId", requireAuth, async (req, res, next) => {
   const userId = req.user.id;
   const bookingId = req.params.bookingId;
+
   const { startDate, endDate } = req.body;
 
   try {
@@ -144,7 +141,7 @@ router.put("/:bookingId", requireAuth, async (req, res, next) => {
 // ==========================================
 //  Delete a booking
 // ==========================================
-router.delete("/:bookingId", requireAuth, async (req, res) => {
+router.delete("/:bookingId", async (req, res) => {
   const { bookingId } = req.params;
   const userId = req.user.id;
 
@@ -162,10 +159,14 @@ router.delete("/:bookingId", requireAuth, async (req, res) => {
     }
 
     if (booking.userId !== userId && booking.Spot.ownerId !== userId) {
-      return res.status(403).json({ message: "Forbidden" });
+      return res
+        .status(403)
+        .json({ message: "Forbidden: Booking doesn't belong to the user" });
     }
 
     const today = new Date();
+    const bookingStartDate = new Date(booking.startDate);
+
     if (new Date(booking.startDate) <= today) {
       return res
         .status(403)

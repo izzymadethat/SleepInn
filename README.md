@@ -714,7 +714,7 @@ Returns all the reviews that belong to a spot specified by id.
 - Request
 
   - Method: Get
-  - Route path: /api/reviews/:spotId
+  - Route path: /api/spots/:spotId/reviews
   - Body: none
 
 - Successful Response
@@ -772,7 +772,7 @@ Create and return a new review for a spot specified by id.
 - Request
 
   - Method: POST
-  - Route path: /api/reviews/:spotId
+  - Route path: /api/spots/:spotId/reviews
   - Headers:
     - Content-Type: application/json
   - Body:
