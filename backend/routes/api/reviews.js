@@ -1,5 +1,11 @@
 const { requireAuth } = require("../../utils/auth");
-const { Review, ReviewImage, Spot, User } = require("../../db/models");
+const {
+  Review,
+  ReviewImage,
+  Spot,
+  User,
+  Sequelize,
+} = require("../../db/models");
 const { check } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
 const {
@@ -17,7 +23,8 @@ const validateReview = [
   check("stars")
     .exists({ checkFalsy: true })
     .isInt({ min: 1, max: 5 })
-    .withMessage("Stars must be an integer from 1 to 5"),
+    .withMessage("Stars must be an integer from 1 to 5")
+    .toInt(10),
   handleValidationErrors,
 ];
 
@@ -27,6 +34,7 @@ router.use("/:reviewId/images", reviewImagesRouter);
 /*
 ========================================
   Get all the reviews of the current user
+  /api/reviews/current
 ========================================
 */
 router.get("/current", requireAuth, async (req, res, next) => {
@@ -44,7 +52,15 @@ router.get("/current", requireAuth, async (req, res, next) => {
         },
         {
           model: Spot,
-          attributes: spotAttributes,
+          attributes: [
+            ...spotAttributes,
+            [
+              Sequelize.literal(
+                `(SELECT "url" FROM "SpotImages" WHERE "SpotImages"."spotId" = "Spot"."id" AND "SpotImages"."preview" = true LIMIT 1)`
+              ),
+              "previewImage",
+            ],
+          ],
         },
         {
           model: ReviewImage,
@@ -61,7 +77,6 @@ router.get("/current", requireAuth, async (req, res, next) => {
 });
 
 // Add an image to a review based on the review's id
-// /api/reviews/:reviewId/images
 router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
   const reviewId = req.params.reviewId;
   const uid = req.user.id;
@@ -97,7 +112,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
     // review doesn't belong to user
     if (existingReview.userId !== uid) {
       return res.status(403).json({
-        message: "Forbidden",
+        message: "Forbidden: Review does not belong to current user",
       });
     }
 
@@ -127,43 +142,37 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
 /*
 ==========================================
     Create a review for a spot based on the spot's id
+    /api/spots/:spotId/reviews
 ==========================================
 */
 router.post("/", requireAuth, validateReview, async (req, res, next) => {
   const spotId = req.params.spotId;
-  const uid = req.user.id;
+  const userId = req.user.id;
   const { review, stars } = req.body;
-
-  const reviewObj = {
-    userId: uid,
-    spotId,
-    review,
-    stars,
-  };
 
   try {
     const existingSpot = await Spot.findByPk(spotId);
     const existingReview = await Review.findOne({
       where: {
-        userId: uid,
+        userId,
         spotId,
       },
     });
 
     if (!existingSpot) {
-      const err = new Error("Spot couldn't be found");
-      err.status = 404;
-      return next(err);
+      return res.status(404).json({
+        message: "Spot couldn't be found",
+      });
     }
 
     if (existingReview) {
-      const err = new Error("User already has a review for this spot");
-      err.status = 500;
-      return next(err);
+      return res.status(500).json({
+        message: "User already has a review for this spot",
+      });
     }
 
-    const newReview = await Review.create(reviewObj);
-    return res.json( newReview );
+    const newReview = await Review.create({ userId, spotId, review, stars });
+    return res.json(newReview);
   } catch (error) {
     next(error);
   }
@@ -180,6 +189,7 @@ router.put(
   validateReview,
   async (req, res, next) => {
     const reviewId = req.params.reviewId;
+    console.log(reviewId);
     const uid = req.user.id;
     const { review, stars } = req.body;
 
@@ -188,21 +198,21 @@ router.put(
 
       // check if review exists
       if (!existingReview) {
-        const err = new Error("Review couldn't be found");
-        err.status = 404;
-        return next(err);
+        return res.status(404).json({
+          message: "Review couldn't be found",
+        });
       }
 
       // check if review belongs to user
       if (existingReview.userId !== uid) {
-        const err = new Error("Forbidden");
-        err.status = 403;
-        return next(err);
+        return res.status(403).json({
+          message: "Forbidden: Review does not belong to current user",
+        });
       }
 
       await existingReview.update({
-        review: review ?? existingReview.review,
-        stars: stars ?? existingReview.stars,
+        review,
+        stars,
       });
 
       await existingReview.save();
@@ -223,22 +233,24 @@ router.delete("/:reviewId", requireAuth, async (req, res, next) => {
   const reviewId = req.params.reviewId;
   const uid = req.user.id;
   try {
-    const existingReview = await Review.findByPk(reviewId);
+    const review = await Review.findByPk(reviewId);
     // check if review exists
-    if (!existingReview) {
-      const err = new Error("Review couldn't be found");
-      err.status = 404;
-      return next(err);
+    if (!review) {
+      return res.status(404).json({
+        message: "Review couldn't be found",
+      });
     }
 
     // check if review belongs to user
-    if (existingReview.userId !== uid) {
-      const err = new Error("Forbidden");
+    if (review.userId !== uid) {
+      const err = new Error(
+        "Forbidden: Review does not belong to current user"
+      );
       err.status = 403;
       return next(err);
     }
 
-    await existingReview.destroy();
+    await review.destroy();
 
     return res.json({ message: "Successfully deleted" });
   } catch (error) {
