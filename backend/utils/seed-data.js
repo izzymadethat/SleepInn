@@ -40,30 +40,6 @@ const spotSeed = [
     price: 123,
   },
   {
-    ownerId: 1,
-    address: "129 Disney Lane",
-    city: "San Francisco",
-    state: "California",
-    country: "United States of America",
-    lat: 43.7645358,
-    lng: -132.4730327,
-    name: "App Academy admission office",
-    description: "Place where web developers are accepted",
-    price: 129,
-  },
-  {
-    ownerId: 1,
-    address: "135 Disney Lane",
-    city: "San Francisco",
-    state: "California",
-    country: "United States of America",
-    lat: 50.7645358,
-    lng: -145.4730327,
-    name: "App Academy",
-    description: "help office",
-    price: 145,
-  },
-  {
     ownerId: 3,
     address: "485 Development Way",
     city: "San Francisco",
@@ -75,42 +51,24 @@ const spotSeed = [
     description: "Nice comfy cot",
     price: 123,
   },
-  {
-    ownerId: 3,
-    address: "9245 Main Street N",
-    city: "Paris",
-    state: "Texas",
-    country: "United States of America",
-    lat: 48.1234576,
-    lng: -129.4793338,
-    name: "Residence Inn",
-    description: "Three bedroom suite with kitchenette and kitchen with island",
-    price: 285,
-  },
 ];
 
 const reviewSeed = [
   {
     userId: 2,
-    spotId: 4,
+    spotId: 1,
     review: "This place gives me the creeps!!",
     stars: 1.5,
   },
   {
     userId: 1,
-    spotId: 5,
+    spotId: 2,
     review: "I really like this place!",
     stars: 5,
   },
   {
     userId: 3,
-    spotId: 2,
-    review: "Great place!",
-    stars: 4.5,
-  },
-  {
-    userId: 2,
-    spotId: 4,
+    spotId: 1,
     review: "Great place!",
     stars: 4.5,
   },
@@ -119,21 +77,15 @@ const reviewSeed = [
 const bookingSeed = [
   {
     spotId: 1,
-    userId: 1,
-    startDate: new Date("2024-09-15"),
-    endDate: new Date("2024-09-16"),
+    userId: 2,
+    startDate: new Date("2030-09-15"),
+    endDate: new Date("2030-09-16"),
   },
   {
     spotId: 2,
     userId: 1,
-    startDate: new Date("2024-09-24"),
+    startDate: new Date("2030-09-24"),
     endDate: new Date("2024-09-25"),
-  },
-  {
-    spotId: 5,
-    userId: 3,
-    startDate: new Date("2024-10-31"),
-    endDate: new Date("2024-11-01"),
   },
 ];
 // const imageSeed = [
@@ -190,34 +142,45 @@ const spotImageSeed = [
     url: "https://placehold.co/600x400/png",
   },
   {
-    spotId: 3,
+    spotId: 1,
     url: "https://placehold.co/600x400/png",
   },
   {
-    spotId: 4,
-    url: "https://placehold.co/600x400/png",
-  },
-  {
-    spotId: 5,
-    preview: true,
+    spotId: 2,
     url: "https://placehold.co/600x400/png",
   },
 ];
+
+// const maxReviewImage = () => {
+//   let max = 10;
+//   for (let i = 0; i < max; i++) {
+//     reviewImageSeed.push({
+//       reviewId: 2,
+//       url: "https://placehold.co/600x400/png",
+//     });
+//   }
+// };
+
 const reviewImageSeed = [
   {
     reviewId: 1,
     url: "https://placehold.co/600x400/png",
   },
   {
-    reviewId: 2,
-    url: "https://placehold.co/600x400/png",
-  },
-  {
-    imageId: 8,
     reviewId: 3,
     url: "https://placehold.co/600x400/png",
   },
 ];
+
+(() => {
+  let max = 10;
+  for (let i = 0; i < max; i++) {
+    reviewImageSeed.push({
+      reviewId: 2,
+      url: "https://placehold.co/600x400/png",
+    });
+  }
+})();
 
 module.exports = {
   userSeed,
