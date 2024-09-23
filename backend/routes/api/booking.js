@@ -141,7 +141,7 @@ router.put("/:bookingId", requireAuth, async (req, res, next) => {
 // ==========================================
 //  Delete a booking
 // ==========================================
-router.delete("/:bookingId", async (req, res) => {
+router.delete("/:bookingId", requireAuth, async (req, res) => {
   const { bookingId } = req.params;
   const userId = req.user.id;
 
@@ -158,29 +158,28 @@ router.delete("/:bookingId", async (req, res) => {
       return res.status(404).json({ message: "Booking couldn't be found" });
     }
 
-    if (booking.userId !== userId && booking.Spot.ownerId !== userId) {
-      return res
-        .status(403)
-        .json({ message: "Forbidden: Booking doesn't belong to the user" });
-    }
-
+    // Bookings in the past or have already started can't be deleted
+    // I think this should be checked for first before checking auth
     const today = new Date();
     const bookingStartDate = new Date(booking.startDate);
+    if (bookingStartDate <= today) {
+      return res.status(403).json({
+        message: "Bookings that have been started can't be deleted",
+      });
+    }
 
-    if (new Date(booking.startDate) <= today) {
-      return res
-        .status(403)
-        .json({ message: "Bookings that have been started can't be deleted" });
+    // Bookings can only be deleted by owner of the spot or the creator of the booking
+    if (booking.Spot.ownerId !== userId && booking.userId !== userId) {
+      return res.status(403).json({
+        message: "Forbidden: Booking doesn't belong to the user",
+      });
     }
 
     await booking.destroy();
 
     return res.status(200).json({ message: "Successfully deleted" });
   } catch (err) {
-    return res.status(500).json({
-      message: "Did not delete booking",
-      error: err.message,
-    });
+    next(err);
   }
 });
 

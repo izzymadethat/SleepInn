@@ -97,4 +97,11 @@ app.use((err, _req, res, _next) => {
   }
 });
 
+process.on("SIGINT", () => {
+  server.close(() => {
+    console.log("Server closed");
+    process.exit(0);
+  });
+});
+
 module.exports = app;

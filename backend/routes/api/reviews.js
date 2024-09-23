@@ -243,11 +243,9 @@ router.delete("/:reviewId", requireAuth, async (req, res, next) => {
 
     // check if review belongs to user
     if (review.userId !== uid) {
-      const err = new Error(
-        "Forbidden: Review does not belong to current user"
-      );
-      err.status = 403;
-      return next(err);
+      return res.status(403).json({
+        message: "Forbidden: Review does not belong to current user",
+      });
     }
 
     await review.destroy();
