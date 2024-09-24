@@ -39,18 +39,6 @@ const spotSeed = [
     description: "Place where web developers are created",
     price: 123,
   },
-  {
-    ownerId: 3,
-    address: "485 Development Way",
-    city: "San Francisco",
-    state: "California",
-    country: "United States of America",
-    lat: 37.7645358,
-    lng: -122.4730327,
-    name: "Shutter Island",
-    description: "Nice comfy cot",
-    price: 123,
-  },
 ];
 
 const reviewSeed = [
@@ -60,32 +48,20 @@ const reviewSeed = [
     review: "This place gives me the creeps!!",
     stars: 1.5,
   },
-  {
-    userId: 1,
-    spotId: 2,
-    review: "I really like this place!",
-    stars: 5,
-  },
-  {
-    userId: 3,
-    spotId: 1,
-    review: "Great place!",
-    stars: 4.5,
-  },
 ];
 
 const bookingSeed = [
   {
     spotId: 1,
     userId: 2,
-    startDate: new Date("2030-09-15"),
-    endDate: new Date("2030-09-16"),
+    startDate: "2031-11-30",
+    endDate: "2031-12-05",
   },
   {
-    spotId: 2,
-    userId: 1,
-    startDate: new Date("2030-09-24"),
-    endDate: new Date("2024-09-25"),
+    spotId: 1,
+    userId: 3,
+    startDate: "2031-10-24",
+    endDate: "2031-10-25",
   },
 ];
 // const imageSeed = [
@@ -137,16 +113,7 @@ const spotImageSeed = [
     url: "https://placehold.co/600x400/png",
   },
   {
-    spotId: 2,
-    preview: true,
-    url: "https://placehold.co/600x400/png",
-  },
-  {
     spotId: 1,
-    url: "https://placehold.co/600x400/png",
-  },
-  {
-    spotId: 2,
     url: "https://placehold.co/600x400/png",
   },
 ];
@@ -166,21 +133,7 @@ const reviewImageSeed = [
     reviewId: 1,
     url: "https://placehold.co/600x400/png",
   },
-  {
-    reviewId: 3,
-    url: "https://placehold.co/600x400/png",
-  },
 ];
-
-(() => {
-  let max = 10;
-  for (let i = 0; i < max; i++) {
-    reviewImageSeed.push({
-      reviewId: 2,
-      url: "https://placehold.co/600x400/png",
-    });
-  }
-})();
 
 module.exports = {
   userSeed,

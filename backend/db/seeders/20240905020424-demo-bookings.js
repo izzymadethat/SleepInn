@@ -10,7 +10,11 @@ if (process.env.NODE_ENV === "production") {
 module.exports = {
   async up(queryInterface, Sequelize) {
     console.log("Seeding Bookings...");
-    await Booking.bulkCreate(bookingSeed, { validate: true });
+    try {
+      await Booking.bulkCreate(bookingSeed, { validate: true });
+    } catch (error) {
+      console.log(error);
+    }
     console.log("Finished Seeding Bookings");
   },
 
