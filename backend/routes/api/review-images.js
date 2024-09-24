@@ -24,12 +24,9 @@ router.post("/:reviewId/images", requireAuth, async (req, res) => {
     }
     // check if the current user is the owner of the review
     if (review.userId !== userId) {
-      return res
-        .status(403)
-        .json({
-          message:
-            "Forbidden: You do not have permission to add images to this review",
-        });
+      return res.status(403).json({
+        message: "Forbidden: Review does not belong to current user",
+      });
     }
 
     // Check if the review already has 10 images
@@ -89,7 +86,9 @@ router.delete("/:imageId", requireAuth, async (req, res, next) => {
     if (image.Review.userId !== userId) {
       return res
         .status(403)
-        .json({ message: "Forbidden: You do not own this review" });
+        .json({
+          message: "Forbidden: Review Image does not belong to current user",
+        });
     }
 
     // Delete the image

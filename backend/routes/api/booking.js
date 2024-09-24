@@ -158,15 +158,15 @@ router.delete("/:bookingId", requireAuth, async (req, res) => {
       return res.status(404).json({ message: "Booking couldn't be found" });
     }
 
-    // Bookings in the past or have already started can't be deleted
-    // I think this should be checked for first before checking auth
-    const today = new Date();
-    const bookingStartDate = new Date(booking.startDate);
-    if (bookingStartDate <= today) {
-      return res.status(403).json({
-        message: "Bookings that have been started can't be deleted",
-      });
-    }
+    // // Bookings in the past or have already started can't be deleted
+    // // I think this should be checked for first before checking auth
+    // const today = new Date();
+    // const bookingStartDate = new Date(booking.startDate);
+    // if (bookingStartDate <= today) {
+    //   return res.status(403).json({
+    //     message: "Bookings that have been started can't be deleted",
+    //   });
+    // }
 
     // Bookings can only be deleted by owner of the spot or the creator of the booking
     if (booking.Spot.ownerId !== userId && booking.userId !== userId) {

@@ -111,6 +111,29 @@ const validateQueryParams = [
   handleValidationErrors,
 ];
 
+const validateBooking = [
+  // Validation for request body
+  check("startDate")
+    .isISO8601()
+    .withMessage("Invalid start date format")
+    .custom((startDate) => {
+      if (new Date(startDate) < new Date()) {
+        throw new Error("startDate cannot be in the past");
+      } else if (new Date(startDate) >= new Date(req.body.endDate)) {
+        throw new Error("startDate cannot be on or after endDate");
+      }
+      return true;
+    }),
+  check("endDate")
+    .isISO8601()
+    .withMessage("Invalid end date format")
+    .custom((endDate, { req }) => {
+      if (new Date(endDate) <= new Date(req.body.startDate)) {
+        throw new Error("endDate cannot be on or before startDate");
+      }
+      return true;
+    }),
+];
 const validateSpotImage = [
   body("url").exists({ checkFalsy: true }).withMessage("Url is required"),
   body("preview")
@@ -341,7 +364,7 @@ router.post("/:spotId/images", requireAuth, async (req, res, next) => {
     }
 
     const image = await SpotImage.create({
-      spotId,
+      spotId: spot.spotId,
       url,
       preview,
     });
@@ -420,7 +443,7 @@ router.delete("/:spotId", requireAuth, async (req, res, next) => {
       });
     }
 
-    spot.destroy();
+    await spot.destroy();
 
     res.status(200).json({
       message: "Successfully deleted",
@@ -547,91 +570,44 @@ router.get("/:spotId/bookings", requireAuth, async (req, res, next) => {
 router.post("/:spotId/bookings", requireAuth, async (req, res) => {
   const { spotId } = req.params;
   const { startDate, endDate } = req.body;
-  const userId = req.user.id;
+  const userId = req.user.id; // Assuming req.user contains authenticated user info
 
   try {
-    // Find the spot by spotId and check if it exists
+    // Find the spot by ID
     const spot = await Spot.findByPk(spotId);
-
     if (!spot) {
-      return res.status(404).json({
-        message: "Spot couldn't be found",
-      });
+      return res.status(404).json({ message: "Spot couldn't be found" });
     }
 
-    // Check if the spot belongs to the current user (authorization)
+    // Ensure the spot does not belong to the current user
     if (spot.ownerId === userId) {
-      return res.status(403).json({
-        message: "Forbidden: You cannot book your own spot",
-      });
+      return res.status(403).json({ message: "Cannot book your own spot" });
     }
 
-    // Check for booking conflicts
-    const today = new Date();
-    const todayDateOnly = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
-    );
-
-    const startDateObj = new Date(startDate);
-    const endDateObj = new Date(endDate);
-
-    // Strip the time component from the received dates
-    const startDateOnly = new Date(
-      startDateObj.getFullYear(),
-      startDateObj.getMonth(),
-      startDateObj.getDate()
-    );
-    const endDateOnly = new Date(
-      endDateObj.getFullYear(),
-      endDateObj.getMonth(),
-      endDateObj.getDate()
-    );
-
-    // Validate the new startDate and endDate
-    const errors = {};
-
-    if (startDateOnly < todayDateOnly) {
-      errors.startDate = "Start Date cannot be in the past";
-    }
-    if (endDateOnly <= startDateOnly) {
-      errors.endDate = "End Date cannot be on or before startDate";
-    }
-
-    if (Object.keys(errors).length > 0) {
-      return res.status(400).json({
-        message: "Bad Request",
-        errors,
-      });
-    }
-
-    // Check for booking conflicts
-    const conflictingBookings = await Booking.findAll({
+    // Check for booking conflicts, including ensuring startDate cannot be the same as an existing endDate
+    const conflict = await Booking.findOne({
       where: {
         spotId,
         [Op.or]: [
           {
-            startDate: {
-              [Op.between]: [startDate, endDate],
-            },
+            startDate: { [Op.between]: [startDate, endDate] },
           },
           {
-            endDate: {
-              [Op.between]: [startDate, endDate],
-            },
+            endDate: { [Op.between]: [startDate, endDate] },
           },
           {
-            [Op.and]: [
-              { startDate: { [Op.lte]: startDate } },
-              { endDate: { [Op.gte]: endDate } },
-            ],
+            startDate: { [Op.lte]: startDate },
+            endDate: { [Op.gte]: endDate },
+          },
+          // Prevent the startDate from matching any existing endDate
+          {
+            endDate: startDate, // Exclude bookings where the endDate matches the new startDate
           },
         ],
       },
     });
 
-    if (conflictingBookings.length > 0) {
+    if (conflict) {
       return res.status(403).json({
         message: "Sorry, this spot is already booked for the specified dates",
         errors: {
@@ -642,25 +618,25 @@ router.post("/:spotId/bookings", requireAuth, async (req, res) => {
     }
 
     // Create the booking
-    const newBooking = await Booking.create({
-      spotId,
+    const booking = await Booking.create({
+      spotId: spot.id,
       userId,
       startDate,
       endDate,
     });
-    // Format the startDate and endDate to remove the time component
-    const formattedBooking = {
-      ...newBooking.toJSON(),
-      startDate: new Date(newBooking.startDate).toISOString().slice(0, 10),
-      endDate: new Date(newBooking.endDate).toISOString().slice(0, 10),
-    };
 
-    res.status(201).json(formattedBooking);
-  } catch (error) {
-    return res.status(500).json({
-      message: "Internal Server Error",
-      error: error.message,
+    // Return success response
+    return res.status(201).json({
+      id: booking.id,
+      spotId: booking.spotId,
+      userId: booking.userId,
+      startDate: booking.startDate,
+      endDate: booking.endDate,
+      createdAt: booking.createdAt,
+      updatedAt: booking.updatedAt,
     });
+  } catch (err) {
+    next(err);
   }
 });
 
