@@ -40,85 +40,96 @@ router.use("/:reviewId/images", reviewImagesRouter);
 */
 router.get("/current", requireAuth, async (req, res, next) => {
   const userId = req.user.id;
-
+  try {
     // Fetch all reviews written by the current user
     const reviews = await Review.findAll({
-        where: { userId: userId },
-        include: [
+      where: { userId: userId },
+      include: [
+        {
+          model: User,
+          attributes: ["id", "firstName", "lastName"],
+        },
+        {
+          model: Spot,
+          attributes: [
+            "id",
+            "ownerId",
+            "address",
+            "city",
+            "state",
+            "country",
+            "lat",
+            "lng",
+            "name",
+            "price",
+          ],
+          include: [
             {
-                model: User,
-                attributes: ['id', 'firstName', 'lastName']
+              model: SpotImage,
+              attributes: ["url", "preview"],
             },
-            {
-                model: Spot,
-                attributes: ['id', 'ownerId', 'address', 'city', 'state', 'country', 'lat', 'lng', 'name', 'price'],
-                include: [
-                    {
-                        model: SpotImage,
-                        attributes: ['url', 'preview']
-                    }
-                ]
-            },
-            {
-                model: ReviewImage,
-                attributes: ['id', 'url']
-            }
-        ]
+          ],
+        },
+        {
+          model: ReviewImage,
+          attributes: ["id", "url"],
+        },
+      ],
     });
 
     let reviewsList = [];
 
     reviews.forEach((review) => {
-        const reviewJSON = review.toJSON();
+      const reviewJSON = review.toJSON();
 
-        // Handle preview image logic for the Spot
-        reviewJSON.Spot.SpotImages.forEach((image) => {
-            if (image.preview === true) {
-                reviewJSON.Spot.previewImage = image.url;
-            }
-        });
-
-        // If no preview image was found, set default message
-        if (!reviewJSON.Spot.previewImage) {
-            reviewJSON.Spot.previewImage = 'No preview image available';
+      // Handle preview image logic for the Spot
+      reviewJSON.Spot.SpotImages.forEach((image) => {
+        if (image.preview === true) {
+          reviewJSON.Spot.previewImage = image.url;
         }
+      });
 
-        // Remove SpotImages array from response
-        delete reviewJSON.Spot.SpotImages;
+      // If no preview image was found, set default message
+      if (!reviewJSON.Spot.previewImage) {
+        reviewJSON.Spot.previewImage = "No preview image available";
+      }
 
-        reviewsList.push({
-            id: reviewJSON.id,
-            userId: reviewJSON.userId,
-            spotId: reviewJSON.spotId,
-            review: reviewJSON.review,
-            stars: reviewJSON.stars,
-            createdAt: reviewJSON.createdAt,
-            updatedAt: reviewJSON.updatedAt,
-            User: {
-                id: reviewJSON.User.id,
-                firstName: reviewJSON.User.firstName,
-                lastName: reviewJSON.User.lastName
-            },
-            Spot: {
-                id: reviewJSON.Spot.id,
-                ownerId: reviewJSON.Spot.ownerId,
-                address: reviewJSON.Spot.address,
-                city: reviewJSON.Spot.city,
-                state: reviewJSON.Spot.state,
-                country: reviewJSON.Spot.country,
-                lat: reviewJSON.Spot.lat,
-                lng: reviewJSON.Spot.lng,
-                name: reviewJSON.Spot.name,
-                price: reviewJSON.Spot.price,
-                previewImage: reviewJSON.Spot.previewImage
-            },
-            ReviewImages: reviewJSON.ReviewImages.map(image => {
-                return {
-                    id: image.id,
-                    url: image.url
-                };
-            })
-        });
+      // Remove SpotImages array from response
+      delete reviewJSON.Spot.SpotImages;
+
+      reviewsList.push({
+        id: reviewJSON.id,
+        userId: reviewJSON.userId,
+        spotId: reviewJSON.spotId,
+        review: reviewJSON.review,
+        stars: reviewJSON.stars,
+        createdAt: reviewJSON.createdAt,
+        updatedAt: reviewJSON.updatedAt,
+        User: {
+          id: reviewJSON.User.id,
+          firstName: reviewJSON.User.firstName,
+          lastName: reviewJSON.User.lastName,
+        },
+        Spot: {
+          id: reviewJSON.Spot.id,
+          ownerId: reviewJSON.Spot.ownerId,
+          address: reviewJSON.Spot.address,
+          city: reviewJSON.Spot.city,
+          state: reviewJSON.Spot.state,
+          country: reviewJSON.Spot.country,
+          lat: reviewJSON.Spot.lat,
+          lng: reviewJSON.Spot.lng,
+          name: reviewJSON.Spot.name,
+          price: reviewJSON.Spot.price,
+          previewImage: reviewJSON.Spot.previewImage,
+        },
+        ReviewImages: reviewJSON.ReviewImages.map((image) => {
+          return {
+            id: image.id,
+            url: image.url,
+          };
+        }),
+      });
     });
 
     res.status(200).json({ Reviews: reviewsList });
