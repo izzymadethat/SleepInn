@@ -38,7 +38,7 @@ input:focus + .label,
   color: #000; /* Active color */
 }
 
-.login-form button {
+.login-form button[type="submit"] {
   display: flex;
   justify-self: flex-end;
   align-items: center;
@@ -52,10 +52,6 @@ input:focus + .label,
   padding: 10px 20px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-}
-
-.login-form button:not(disabled):hover {
-  background-color: #ff4938e0;
 }
 
 .login-form__error {

@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import * as sessionActions from "../../store/session";
 import { useEffect, useRef, useState } from "react";
 import OpenModalButton from "../OpenModalButton";
-import SignupFormModal from "../SignupFormModal/SignupFormPage";
+import SignupFormModal from "../SignupFormModal";
 import LoginFormModal from "../LoginFormModal";
 
 const ProfileButton = ({ user }) => {
