@@ -36,10 +36,6 @@ const router = createBrowserRouter([
         )
       },
       {
-        path: "login",
-        element: <LoginFormModal />
-      },
-      {
         path: "signup",
         element: <SignupFormPage />
       }
