@@ -2,26 +2,26 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import * as sessionActions from "../../store/session";
 import { useDispatch, useSelector } from "react-redux";
-import "./LoginFormPage.css";
+import "./LoginFormModal.css";
+import { useModal } from "../../context/Modal";
 
-const LoginFormPage = () => {
+const LoginFormModal = () => {
   const sessionUser = useSelector((state) => state.session.user);
   const dispatch = useDispatch();
   const [credential, setCredential] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
-
-  if (sessionUser) return <Navigate to="/" replace />;
+  const { closeModal } = useModal();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setErrors({});
-    dispatch(sessionActions.loginUser({ credential, password })).catch(
-      async (res) => {
+    dispatch(sessionActions.loginUser({ credential, password }))
+      .then(closeModal)
+      .catch(async (res) => {
         const data = await res.json();
         if (data?.errors) setErrors(data.errors);
-      }
-    );
+      });
   };
 
   return (
@@ -53,4 +53,4 @@ const LoginFormPage = () => {
   );
 };
 
-export default LoginFormPage;
+export default LoginFormModal;
