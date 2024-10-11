@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import "./SignupFormPage.css";
+import "./SignupFormModal.css";
 import { Navigate } from "react-router-dom";
 import * as sessionActions from "../../store/session";
+import { useModal } from "../../context/Modal";
 
-const SignupFormPage = () => {
+const SignupFormModal = () => {
   const sessionUser = useSelector((state) => state.session.user);
   const dispatch = useDispatch();
 
@@ -16,6 +17,7 @@ const SignupFormPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [errors, setErrors] = useState({});
+  const { closeModal } = useModal();
 
   if (sessionUser) return <Navigate to="/" replace />;
 
@@ -36,7 +38,7 @@ const SignupFormPage = () => {
       password
     };
 
-    dispatch(sessionActions.registerUser(user)).catch(async (res) => {
+    dispatch(sessionActions.registerUser(user)).then(closeModal).catch(async (res) => {
       const data = await res.json();
       if (data?.errors) setErrors(data.errors);
     });
@@ -114,4 +116,4 @@ const SignupFormPage = () => {
   );
 };
 
-export default SignupFormPage;
+export default SignupFormModal;

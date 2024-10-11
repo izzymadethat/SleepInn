@@ -1,44 +1,46 @@
 import { NavLink } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import * as sessionActions from "../../store/session";
+import { useSelector } from "react-redux";
 import ProfileButton from "./ProfileButton";
 import OpenModalButton from "../OpenModalButton";
 import LoginFormModal from "../LoginFormModal";
 import "./Navigation.css";
+import SignupFormModal from "../SignupFormModal/SignupFormPage";
 
 const Navigation = ({ isLoaded }) => {
   const sessionUser = useSelector((state) => state.session.user);
-  const dispatch = useDispatch();
 
-  const logout = (e) => {
-    e.preventDefault();
-    dispatch(sessionActions.logout());
-  };
-
-  const authenticationLinks = sessionUser ? (
-    <li>
-      <ProfileButton user={sessionUser} />
-    </li>
-  ) : (
-    <>
+  let authLinks;
+  if (sessionUser) {
+    authLinks = (
       <li>
-        <OpenModalButton
-          buttonText="Log In"
-          modalComponent={<LoginFormModal />}
-        />
+        <ProfileButton user={sessionUser} />
       </li>
-      <li>
-        <NavLink to="/signup">Sign Up</NavLink>
-      </li>
-    </>
-  );
+    );
+  } else {
+    authLinks = (
+      <>
+        <li>
+          <OpenModalButton
+            buttonText="Log In"
+            modalComponent={<LoginFormModal />}
+          />
+        </li>
+        <li>
+          <OpenModalButton
+            buttonText="Sign Up"
+            modalComponent={<SignupFormModal />}
+          />
+        </li>
+      </>
+    );
+  }
 
   return (
     <nav className="nav-bar">
       <li>
         <NavLink to="/">Home</NavLink>
       </li>
-      {isLoaded && authenticationLinks}
+      {isLoaded && authLinks}
     </nav>
   );
 };

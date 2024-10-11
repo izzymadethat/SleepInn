@@ -2,8 +2,6 @@ import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import * as sessionActions from "./store/session";
-import LoginFormModal from "./components/LoginFormModal";
-import SignupFormPage from "./components/SignupFormPage";
 import Navigation from "./components/Navigation";
 
 function Layout() {
@@ -34,10 +32,6 @@ const router = createBrowserRouter([
             Welcome to <span style={{ color: "#FF6F61" }}>SleepInn!</span>
           </h1>
         )
-      },
-      {
-        path: "signup",
-        element: <SignupFormPage />
       }
     ]
   }
