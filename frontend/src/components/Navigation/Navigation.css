@@ -59,13 +59,21 @@
   font-size: 1.5rem;
   color: white;
   line-height: 0.5;
-  text-decoration: underline;
+  /* text-decoration: underline; */
+}
+
+.profile-dropdown .auth-header {
+  font-size: 1.4rem;
+  color: white;
+  line-height: 1.5;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 .profile-dropdown hr {
   margin: 10px 0;
   border: 1px solid white;
-  max-width: 50%;
+  max-width: 75%;
 }
 
 .profile-dropdown li {
@@ -91,6 +99,12 @@
 .profile-dropdown li button:hover {
   background-color: #9e3d345b;
   color: white;
+}
+
+.profile-dropdown .auth-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }
 
 .profile-dropdown.hidden {
