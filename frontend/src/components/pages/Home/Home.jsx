@@ -16,9 +16,9 @@ const Home = () => {
     <main>
       <div className="home-container">
         <h1>Sleep only where you can dream.</h1>
-        <div className="spot-grid">
+        <div className="spots-grid">
           {spots.map((spot) => (
-            <SpotCard spot={spot} />
+            <SpotCard spot={spot} key={spot.id} />
           ))}
         </div>
       </div>

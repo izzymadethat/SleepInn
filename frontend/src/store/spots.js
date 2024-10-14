@@ -2,6 +2,8 @@ import { csrfFetch } from "./csrf";
 
 const SET_SPOTS = "spots/SET_SPOTS";
 const ADD_SPOT = "spots/ADD_SPOT";
+const SET_SPOT_DETAILS = "spots/GET_SPOT_DETAILS";
+const SET_SPOT_REVIEWS = "spots/SET_SPOT_REVIEWS";
 const UPDATE_SPOT = "spots/UPDATE_SPOT";
 const DELETE_SPOT = "spots/DELETE_SPOT";
 
@@ -13,6 +15,21 @@ export const setSpots = (spots) => {
   };
 };
 
+export const setSpotDetails = (spot) => {
+  return {
+    type: SET_SPOT_DETAILS,
+    payload: spot
+  };
+};
+
+export const setSpotReviews = (reviews) => {
+  return {
+    type: SET_SPOT_REVIEWS,
+    payload: reviews
+  };
+};
+
+// Action Functions
 export const addSpot = (spot) => {
   return {
     type: ADD_SPOT,
@@ -27,9 +44,28 @@ export const fetchSpots = () => (dispatch) => {
     .catch((error) => console.error(error));
 };
 
+export const fetchSpotDetails = (spotId) => (dispatch) => {
+  csrfFetch(`/api/spots/${spotId}`)
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Spot details that came in: ", data);
+      dispatch(setSpotDetails(data));
+    })
+    .catch((error) => console.error(error));
+
+  csrfFetch(`/api/spots/${spotId}/reviews`)
+    .then((response) => response.json())
+    .then((reviewData) => {
+      console.log("Reviews that came in: ", reviewData);
+      dispatch(setSpotReviews(reviewData.Reviews));
+    })
+    .catch((error) => console.error(error));
+};
+
 const initialState = {
   byId: {},
-  allSpots: []
+  allSpots: [],
+  spotDetails: null
 };
 
 const spotsReducer = (state = initialState, action) => {
@@ -42,6 +78,28 @@ const spotsReducer = (state = initialState, action) => {
         allSpots
       };
     }
+
+    case SET_SPOT_DETAILS: {
+      console.log(console.log("Settng spot details: ", action.payload));
+      return {
+        ...state,
+        spotDetails: action.payload || {}
+      };
+    }
+
+    case SET_SPOT_REVIEWS: {
+      console.log(console.log("Settng spot reviews: ", action.payload));
+      const updatedSpotDetails = {
+        ...state.spotDetails,
+        Reviews: action.payload
+      };
+
+      return {
+        ...state,
+        spotDetails: updatedSpotDetails
+      };
+    }
+
     default:
       return state;
   }

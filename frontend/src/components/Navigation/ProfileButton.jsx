@@ -64,21 +64,21 @@ const ProfileButton = ({ user }) => {
 
             <li>{user.email}</li>
             <li>
-              <button onClick={logout}>
+              <button onClick={logout} className="site-btn primary">
                 Log Out <RiLogoutBoxRLine />
               </button>
             </li>
           </>
         ) : (
           <>
-            <li>
+            <li className="profile-dropdown__link">
               <OpenModalButton
                 buttonText="Log In"
                 onButtonClick={closeMenu}
                 modalComponent={<LoginFormModal />}
               />
             </li>
-            <li>
+            <li className="profile-dropdown__link">
               <OpenModalButton
                 buttonText="Sign Up"
                 onButtonClick={closeMenu}
