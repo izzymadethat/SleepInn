@@ -1,14 +1,14 @@
-import {
-  RiLogoutBoxRLine,
-  RiUserReceivedFill,
-  RiUserShared2Fill
-} from "react-icons/ri";
 import { useDispatch } from "react-redux";
 import * as sessionActions from "../../store/session";
 import { useEffect, useRef, useState } from "react";
 import OpenModalButton from "../OpenModalButton";
 import SignupFormModal from "../SignupFormModal";
 import LoginFormModal from "../LoginFormModal";
+import {
+  RiUserReceivedFill,
+  RiUserShared2Fill,
+  RiLogoutBoxRLine,
+} from "react-icons/ri";
 
 const ProfileButton = ({ user }) => {
   const dispatch = useDispatch();

@@ -9,7 +9,7 @@ const Navigation = ({ isLoaded }) => {
   return (
     <nav className="nav-bar">
       <li>
-        <NavLink to="/">Home</NavLink>
+        <NavLink to="/">SleepInn</NavLink>
       </li>
       {isLoaded && (
         <li>

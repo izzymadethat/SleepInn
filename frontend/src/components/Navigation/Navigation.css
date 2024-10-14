@@ -4,12 +4,11 @@
 .nav-bar {
   background-color: #ff6f61;
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
   align-items: center;
 
   position: relative;
   min-height: 80px;
-  max-width: 98vw;
   border: 2px solid rgb(116, 59, 53);
   margin: 0 auto;
   border-radius: 5px;

@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import * as sessionActions from "./store/session";
 import Navigation from "./components/Navigation";
+import Home from "./components/pages/Home";
 
 function Layout() {
   const dispatch = useDispatch();
@@ -27,14 +28,10 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: (
-          <h1>
-            Welcome to <span style={{ color: "#FF6F61" }}>SleepInn!</span>
-          </h1>
-        )
-      }
-    ]
-  }
+        element: <Home />,
+      },
+    ],
+  },
 ]);
 
 function App() {
