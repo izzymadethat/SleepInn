@@ -17,7 +17,10 @@ function Layout() {
 
   return (
     <>
-      <Navigation isLoaded={isLoaded} /> {isLoaded && <Outlet />}
+      <header>
+        <Navigation isLoaded={isLoaded} />
+      </header>
+      {isLoaded && <Outlet />}
     </>
   );
 }
@@ -28,10 +31,10 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <Home />,
-      },
-    ],
-  },
+        element: <Home />
+      }
+    ]
+  }
 ]);
 
 function App() {
