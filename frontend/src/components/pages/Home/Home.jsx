@@ -1,62 +1,28 @@
+import "./Home.css";
+import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { FaStar } from "react-icons/fa6";
+import * as spotActions from "../../../store/spots";
+import SpotCard from "../../SpotCard";
 
 const Home = () => {
+  const dispatch = useDispatch();
+  const spots = useSelector((state) => state.spots.allSpots);
+
+  useEffect(() => {
+    dispatch(spotActions.fetchSpots());
+  }, [dispatch]);
+
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
-        gap: "20px",
-      }}
-    >
-      <div className="card">
-        <div>
-          <img src="https://placehold.co/400x400/png" alt="img" />
+    <main>
+      <div className="home-container">
+        <h1>Sleep only where you can dream.</h1>
+        <div className="spot-grid">
+          {spots.map((spot) => (
+            <SpotCard spot={spot} />
+          ))}
         </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <h3>Tallahassee, FL</h3>
-          <FaStar />
-        </div>
-        <p>$123 per night</p>
       </div>
-
-      <div className="card">
-        <img src="https://placehold.co/400x400/png" alt="img" />
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <h3>Tallahassee, FL</h3>
-          <FaStar />
-        </div>
-        <p>$123 per night</p>
-      </div>
-
-      <div className="card">
-        <img src="https://placehold.co/400x400/png" alt="img" />
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <h3>Tallahassee, FL</h3>
-          <FaStar />
-        </div>
-        <p>$123 per night</p>
-      </div>
-    </div>
+    </main>
   );
 };
 
