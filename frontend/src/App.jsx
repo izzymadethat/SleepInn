@@ -6,6 +6,8 @@ import Navigation from "./components/Navigation";
 import Home from "./components/pages/Home";
 import SpotDetails from "./components/pages/SpotDetails";
 import CreateSpot from "./components/pages/CreateSpot";
+import ManageSpots from "./components/pages/ManageSpots";
+import DeleteSpotModal from "./components/DeleteSpotModal/DeleteSpotModal";
 
 function Layout() {
   const dispatch = useDispatch();
@@ -45,6 +47,14 @@ const router = createBrowserRouter([
           {
             path: "new",
             element: <CreateSpot />
+          },
+          {
+            path: "current",
+            element: <ManageSpots />
+          },
+          {
+            path: "delete",
+            element: <DeleteSpotModal />
           }
         ]
       }

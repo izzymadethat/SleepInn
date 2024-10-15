@@ -18,7 +18,7 @@ a {
 }
 
 .container {
-  max-width: 1000px;
+  max-width: 80%;
   margin: 0 auto;
 }
 
@@ -34,7 +34,7 @@ container h1 {
   font-weight: 400;
 }
 
-.site-btn {
+.site-btn.primary {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -51,7 +51,43 @@ container h1 {
   font-size: 1.1rem;
 }
 
-.site-btn:hover {
+.site-btn.primary:hover,
+.site-btn.danger:hover {
   background-color: #fd4a39;
   color: white;
+}
+
+.site-btn.secondary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  background-color: white;
+  color: #ff6f61;
+  border: 2px solid #ff6f61;
+  border-radius: 0.25rem;
+  padding: 0.625rem 1.25rem;
+  max-width: 200px;
+  transition: all 0.2s ease-in-out;
+}
+
+.site-btn.secondary:hover {
+  background-color: #ff6f61;
+  color: white;
+}
+
+.site-btn.danger {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.25rem;
+  cursor: pointer;
+  background-color: #ff6f61;
+  color: white;
+  border: none;
+  border-radius: 0.25rem;
+  padding: 0.625rem 1.25rem;
+  max-width: 200px;
+  transition: all 0.2s ease-in-out;
 }
