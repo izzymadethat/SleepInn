@@ -1,0 +1,83 @@
+.create-spot-form {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.625rem;
+}
+
+.create-spot-form hr {
+  width: 80%;
+  margin: 1.75rem auto;
+}
+
+.form__section-header {
+  margin: 0 0 1rem;
+}
+
+h2 {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+/* Validation and Error Styles */
+.error {
+  color: #e74c3c;
+  font-size: 13px;
+  margin-top: 5px;
+}
+
+input[type="text"].error-input,
+input[type="number"].error-input,
+input[type="url"].error-input,
+textarea.error-input {
+  border-color: #e74c3c;
+}
+
+.submit-btn {
+  background-color: #d9534f;
+  color: #fff;
+  padding: 10px;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.submit-btn:hover {
+  background-color: #c9302c;
+}

@@ -1,0 +1,70 @@
+.signup-form__title {
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.signup-form__input-container {
+  position: relative;
+  margin-bottom: 30px;
+}
+
+input {
+  width: 90%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.label {
+  position: absolute;
+  top: 10px; /* Adjust as needed */
+  left: 10px; /* Adjust as needed */
+  transition: all 0.2s ease;
+  pointer-events: none;
+  color: #aaa; /* Change color as needed */
+}
+
+input:focus + .label,
+.label.active {
+  top: -10px; /* Adjust to make label move up */
+  left: 10px; /* Same horizontal alignment */
+  font-size: 12px; /* Change size if you want */
+  color: #000; /* Active color */
+}
+
+.signup-form button[type="submit"] {
+  display: flex;
+  justify-self: flex-end;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1rem;
+  margin-top: 20px;
+  background-color: #ff6f61;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.show-password-btn {
+  position: absolute;
+  right: 80px;
+  top: 10px; /* Align with the input field */
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px; /* Adjust icon size */
+  color: #aaa; /* Adjust color as needed */
+}
+
+.show-password-button:hover {
+  color: #000; /* Change color on hover */
+}
+
+.error {
+  color: red; /* Adjust styling for error messages */
+  font-size: 12px;
+}

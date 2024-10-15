@@ -1,0 +1,70 @@
+.home-container {
+  max-width: 80%;
+  margin: 0 auto;
+}
+
+.home-container h1 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  margin-bottom: 1rem;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.spots-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.spots-grid__actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* .spot-card is a <Link> element to the spot page that wraps the spot-img, spot-header, and spot-price */
+.spot-card {
+  color: inherit;
+  text-decoration: none;
+}
+
+.spot-card__img-container {
+  width: 100%;
+  height: 100%;
+}
+
+.spot-card__img-container img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  border-radius: 0.625rem;
+}
+
+.spot-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+
+.spot-card__header h3 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.spot-card__header .spot-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: bold;
+}
+
+.spot-card__price {
+  font-size: 1.5rem;
+  line-height: 1.75rem;
+  font-weight: bold;
+}
