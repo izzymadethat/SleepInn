@@ -14,6 +14,9 @@ const LoginFormModal = () => {
   const [errors, setErrors] = useState({});
   const { closeModal } = useModal();
 
+  const hasNoCredentials = !credential || !password;
+  const isInvalid = credential.length < 4 || password.length < 6;
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setErrors({});
@@ -80,7 +83,7 @@ const LoginFormModal = () => {
             cursor: !credential || !password ? "not-allowed" : "pointer"
           }}
           type="submit"
-          disabled={!credential || !password}
+          disabled={hasNoCredentials || isInvalid}
         >
           Log In
         </button>

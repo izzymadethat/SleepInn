@@ -111,7 +111,7 @@ const SpotDetails = () => {
             </div>
           </div>
           <button
-            className="site-btn"
+            className="site-btn primary"
             onClick={() => alert("Heads Up! This Feature is coming soon.")}
           >
             Reserve

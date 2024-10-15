@@ -12,11 +12,20 @@
 
 .images-grid__img-container {
   width: 100%;
+  height: 100%;
+}
+
+/* .images-grid__secondary div img {
+  width: 100%;
+  object-fit: cover;
+} */
+
+.images-grid__img-container {
+  width: 100%;
 }
 
 .images-grid__img-container img {
   width: 100%;
-  height: 100%;
   object-fit: cover;
   transition: all 0.2s ease-in-out;
 }

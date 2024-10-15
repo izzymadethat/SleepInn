@@ -17,6 +17,12 @@
   gap: 1rem;
 }
 
+.spots-grid__actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
 /* .spot-card is a <Link> element to the spot page that wraps the spot-img, spot-header, and spot-price */
 .spot-card {
   color: inherit;

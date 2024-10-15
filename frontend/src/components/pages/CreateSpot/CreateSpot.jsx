@@ -30,33 +30,17 @@ const CreateSpot = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    // Validation for required fields
-    if (!formData.country) newErrors.country = "Country is required";
-    if (!formData.address) newErrors.address = "Address is required";
-    if (!formData.city) newErrors.city = "City is required";
-    if (!formData.state) newErrors.state = "State is required";
-    if (formData.description.length < 30)
-      newErrors.description = "Description needs a minimum of 30 characters";
-    if (!formData.name) newErrors.name = "Name is required";
-    if (!formData.price) newErrors.price = "Price is required";
-
-    // Validation for images
-    if (!formData.previewImage) {
-      newErrors.previewImage = "Preview image is required";
-    } else if (!formData.previewImage.match(/\.(jpg|jpeg|png)$/)) {
-      newErrors.previewImage = "Image URL must end in .png, .jpg, or .jpeg";
-    }
-
-    // Return the errors (if any)
-    return newErrors;
+  const handleImageChange = (index, value) => {
+    console.log("Image changing!");
+    console.log(index, value);
+    const newImages = [...formData.images];
+    newImages[index] = value;
+    setFormData({ ...formData, images: newImages });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
-
     const spotData = {
       ...formData,
       price: parseFloat(formData.price),
@@ -64,19 +48,16 @@ const CreateSpot = () => {
       lng: parseFloat(formData.lng)
     };
 
-    const imageData = {
-      url: formData.previewImage,
-      preview: true,
-      spotId: spotData.id
-    };
+    const imageUrls = [formData.previewImage, ...formData.images];
 
     try {
       const createdSpot = await dispatch(
-        spotActions.addSpot(spotData, imageData)
+        spotActions.addSpot(spotData, imageUrls)
       );
 
       if (createdSpot && createdSpot.spot.id) {
         alert("Spot created successfully!");
+        await dispatch(spotActions.fetchSpots());
         return navigate(`/spots/${createdSpot.spot.id}`);
       }
     } catch (error) {
@@ -296,6 +277,7 @@ const CreateSpot = () => {
             id="image-1"
             name="image-1"
             placeholder="Image URL"
+            onChange={(e) => handleImageChange(0, e.target.value)}
           />
         </div>
         <div className="form-group">
@@ -305,6 +287,7 @@ const CreateSpot = () => {
             id="image-2"
             name="image-2"
             placeholder="Image URL"
+            onChange={(e) => handleImageChange(1, e.target.value)}
           />
         </div>
         <div className="form-group">
@@ -314,6 +297,7 @@ const CreateSpot = () => {
             id="image-3"
             name="image-3"
             placeholder="Image URL"
+            onChange={(e) => handleImageChange(2, e.target.value)}
           />
         </div>
         <hr />
