@@ -10,6 +10,7 @@ import {
   RiLogoutBoxRLine
 } from "react-icons/ri";
 import { MdOutlineMenu } from "react-icons/md";
+import { Link } from "react-router-dom";
 
 const ProfileButton = ({ user }) => {
   const dispatch = useDispatch();
@@ -63,6 +64,9 @@ const ProfileButton = ({ user }) => {
             <li>Hello, {user.username}</li>
 
             <li>{user.email}</li>
+            <li>
+              <Link to="/spots/current">Manage Spots</Link>
+            </li>
             <li>
               <button onClick={logout} className="site-btn primary">
                 Log Out <RiLogoutBoxRLine />

@@ -1,8 +1,8 @@
 import "./ToolTip.css";
 
-const ToolTip = ({ text, children }) => {
+const ToolTip = ({ text, children, ...props }) => {
   return (
-    <div className="tooltip">
+    <div className="tooltip" onClick={props.onClick}>
       {children} <span className="tooltip__text">{text}</span>
     </div>
   );
