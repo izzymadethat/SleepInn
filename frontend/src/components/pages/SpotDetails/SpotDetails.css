@@ -42,6 +42,11 @@
   padding: 1.5rem 0;
 }
 
+.spot-details__description {
+  margin-top: 1rem;
+  max-width: 80%;
+}
+
 .spot-details__booking-info {
   justify-self: center;
   display: flex;

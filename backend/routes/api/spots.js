@@ -305,8 +305,7 @@ router.get("/:spotId", async (req, res, next) => {
         },
         {
           model: SpotImage,
-          attributes: [...imageAttributes, "preview"],
-          separate: true // Fetch SpotImages separately to avoid grouping issues
+          attributes: [...imageAttributes, "preview"]
         }
       ]
     });

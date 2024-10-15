@@ -80,8 +80,7 @@ const SpotDetails = () => {
           </h2>
           {spot.description && spot.description.length > 100 && (
             <div className="spot-details__description">
-              <p>{spot.description.slice(0, 50)}</p>{" "}
-              <p>{spot.description.slice(50)}</p>
+              <p>{spot.description}</p>
             </div>
           )}
 
