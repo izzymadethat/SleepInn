@@ -1,0 +1,328 @@
+import React, { useState } from "react";
+import "./CreateSpot.css";
+import { useDispatch, useSelector } from "react-redux";
+import * as spotActions from "../../../store/spots";
+import { Navigate, useNavigate } from "react-router-dom";
+
+const CreateSpot = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.session.user);
+
+  const [formData, setFormData] = useState({
+    country: "",
+    address: "",
+    city: "",
+    state: "",
+    lat: "",
+    lng: "",
+    description: "",
+    name: "",
+    price: "",
+    previewImage: "",
+    images: []
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    // Validation for required fields
+    if (!formData.country) newErrors.country = "Country is required";
+    if (!formData.address) newErrors.address = "Address is required";
+    if (!formData.city) newErrors.city = "City is required";
+    if (!formData.state) newErrors.state = "State is required";
+    if (formData.description.length < 30)
+      newErrors.description = "Description needs a minimum of 30 characters";
+    if (!formData.name) newErrors.name = "Name is required";
+    if (!formData.price) newErrors.price = "Price is required";
+
+    // Validation for images
+    if (!formData.previewImage) {
+      newErrors.previewImage = "Preview image is required";
+    } else if (!formData.previewImage.match(/\.(jpg|jpeg|png)$/)) {
+      newErrors.previewImage = "Image URL must end in .png, .jpg, or .jpeg";
+    }
+
+    // Return the errors (if any)
+    return newErrors;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setErrors({});
+
+    const spotData = {
+      ...formData,
+      price: parseFloat(formData.price),
+      lat: parseFloat(formData.lat),
+      lng: parseFloat(formData.lng)
+    };
+
+    const imageData = {
+      url: formData.previewImage,
+      preview: true,
+      spotId: spotData.id
+    };
+
+    try {
+      const createdSpot = await dispatch(
+        spotActions.addSpot(spotData, imageData)
+      );
+
+      if (createdSpot && createdSpot.spot.id) {
+        alert("Spot created successfully!");
+        return navigate(`/spots/${createdSpot.spot.id}`);
+      }
+    } catch (error) {
+      setErrors(error.errors);
+    }
+  };
+
+  if (!user) {
+    return (
+      <Navigate
+        to={"/"}
+        state={{ error: "Please login to create a spot" }}
+        replace
+      />
+    );
+  }
+
+  return (
+    <main className="container">
+      <div className="container__header">
+        <h1>Create a new Spot</h1>
+      </div>
+      <form className="create-spot-form" onSubmit={handleSubmit}>
+        <div className="form__section-header">
+          <h2>Where's your place located?</h2>
+          <p>
+            Guests will only get your exact address once they booked a
+            reservation.
+          </p>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="country">Country</label>
+          <input
+            type="text"
+            id="country"
+            value={formData.country}
+            onChange={handleInputChange}
+            name="country"
+            placeholder="Country"
+            className={errors.country ? "error-input" : ""}
+            required
+          />
+          {errors.country && <p className="error">{errors.country}</p>}
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="address">Street Address</label>
+            <input
+              type="text"
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              placeholder="Address"
+              className={errors.address ? "error-input" : ""}
+              required
+            />
+            {errors.address && <p className="error">{errors.address}</p>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="city">City</label>
+            <input
+              type="text"
+              id="city"
+              name="city"
+              placeholder="City"
+              value={formData.city}
+              onChange={handleInputChange}
+              className={errors.city ? "error-input" : ""}
+              required
+            />
+            {errors.city && <p className="error">{errors.city}</p>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="state">State</label>
+            <input
+              type="text"
+              id="state"
+              name="state"
+              value={formData.state}
+              onChange={handleInputChange}
+              placeholder="State"
+              className={errors.state ? "error-input" : ""}
+              required
+            />
+            {errors.state && <p className="error">{errors.state}</p>}
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="latitude">Latitude (Optional)</label>
+            <input
+              type="number"
+              step={"any"}
+              id="latitude"
+              name="lat"
+              value={formData.lat}
+              onChange={handleInputChange}
+              placeholder="Latitude"
+              className={errors.lat ? "error-input" : ""}
+            />
+            {errors.lat && <p className="error">{errors.lat}</p>}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="longitude">Longitude (Optional)</label>
+            <input
+              type="number"
+              step={"any"}
+              id="longitude"
+              name="lng"
+              value={formData.lng}
+              onChange={handleInputChange}
+              placeholder="Longitude"
+              className={errors.lng ? "error-input" : ""}
+            />
+            {errors.lng && <p className="error">{errors.lng}</p>}
+          </div>
+        </div>
+
+        <hr />
+        <div className="form-group">
+          <div className="form__section-header">
+            <h2>Describe your place to guests</h2>
+            <p>
+              Mention the best features of your space, any special amentities
+              like fast wif or parking, and what you love about the
+              neighborhood.
+            </p>
+          </div>
+          <textarea
+            id="description"
+            name="description"
+            rows="4"
+            placeholder="Please write at least 30 characters"
+            value={formData.description}
+            onChange={handleInputChange}
+            className={errors.description ? "error-input" : ""}
+            required
+          ></textarea>
+          {errors.description && <p className="error">{errors.description}</p>}
+        </div>
+
+        <hr />
+        <div className="form-group">
+          <div className="form__section-header">
+            <h2>Create a title for your spot</h2>
+            <p>
+              Catch guests' attention with a spot title that highlights what
+              makes your place special.
+            </p>
+          </div>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            placeholder="Name of your spot"
+            className={errors.name ? "error-input" : ""}
+            required
+          />
+          {errors.name && <p className="error">{errors.name}</p>}
+        </div>
+
+        <hr />
+        <div className="form-group">
+          <div className="form__section-header">
+            <h2>Set a base price for your spot</h2>
+            <p>
+              Competitive pricing can help your listing stand out and rank
+              higher in search results.
+            </p>
+          </div>
+          <input
+            type="number"
+            id="price"
+            name="price"
+            value={formData.price}
+            onChange={handleInputChange}
+            placeholder="Price per night (USD)"
+            className={errors.price ? "error-input" : ""}
+            required
+          />
+          {errors.price && <p className="error">{errors.price}</p>}
+        </div>
+        <hr />
+        <div className="form__section-header">
+          <h2>Liven up your spot with photos</h2>
+          <p>Submit a link to at least one photo to publish your spot.</p>
+        </div>
+        <div className="form-group">
+          <label htmlFor="image-preview">Preview Image URL</label>
+          <input
+            type="url"
+            id="previewImage"
+            name="previewImage"
+            value={formData.previewImage}
+            onChange={handleInputChange}
+            placeholder="Preview Image URL"
+            className={errors.previewImage ? "error-input" : ""}
+            required
+          />
+          {errors.previewImage && (
+            <p className="error">{errors.previewImage}</p>
+          )}
+        </div>
+
+        {/* TODO: Add image upload functionality */}
+        <div className="form-group">
+          <label htmlFor="image-1">Image URL</label>
+          <input
+            type="url"
+            id="image-1"
+            name="image-1"
+            placeholder="Image URL"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="image-2">Image URL</label>
+          <input
+            type="url"
+            id="image-2"
+            name="image-2"
+            placeholder="Image URL"
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="image-3">Image URL</label>
+          <input
+            type="url"
+            id="image-3"
+            name="image-3"
+            placeholder="Image URL"
+          />
+        </div>
+        <hr />
+        <button type="submit" className="submit-btn">
+          Create Spot
+        </button>
+      </form>
+    </main>
+  );
+};
+
+export default CreateSpot;

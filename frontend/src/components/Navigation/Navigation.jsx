@@ -12,9 +12,16 @@ const Navigation = ({ isLoaded }) => {
         <NavLink to="/">SleepInn</NavLink>
       </li>
       {isLoaded && (
-        <li>
-          <ProfileButton user={sessionUser} />
-        </li>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          {sessionUser && (
+            <li>
+              <NavLink to="/spots/new">Create a new Spot</NavLink>
+            </li>
+          )}
+          <li>
+            <ProfileButton user={sessionUser} />
+          </li>
+        </div>
       )}
     </nav>
   );
