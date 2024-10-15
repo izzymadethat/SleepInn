@@ -4,14 +4,14 @@ const {
   ReviewImage,
   Spot,
   User,
-  SpotImage,
+  SpotImage
 } = require("../../db/models");
 const { check } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
 const {
   spotAttributes,
   userAttributes,
-  imageAttributes,
+  imageAttributes
 } = require("../../utils/attributes");
 const router = require("express").Router({ mergeParams: true });
 
@@ -25,7 +25,7 @@ const validateReview = [
     .isInt({ min: 1, max: 5 })
     .withMessage("Stars must be an integer from 1 to 5")
     .toInt(10),
-  handleValidationErrors,
+  handleValidationErrors
 ];
 
 const reviewImagesRouter = require("./review-images");
@@ -47,7 +47,7 @@ router.get("/current", requireAuth, async (req, res, next) => {
       include: [
         {
           model: User,
-          attributes: ["id", "firstName", "lastName"],
+          attributes: ["id", "firstName", "lastName"]
         },
         {
           model: Spot,
@@ -61,20 +61,20 @@ router.get("/current", requireAuth, async (req, res, next) => {
             "lat",
             "lng",
             "name",
-            "price",
+            "price"
           ],
           include: [
             {
               model: SpotImage,
-              attributes: ["url", "preview"],
-            },
-          ],
+              attributes: ["url", "preview"]
+            }
+          ]
         },
         {
           model: ReviewImage,
-          attributes: ["id", "url"],
-        },
-      ],
+          attributes: ["id", "url"]
+        }
+      ]
     });
 
     let reviewsList = [];
@@ -108,7 +108,7 @@ router.get("/current", requireAuth, async (req, res, next) => {
         User: {
           id: reviewJSON.User.id,
           firstName: reviewJSON.User.firstName,
-          lastName: reviewJSON.User.lastName,
+          lastName: reviewJSON.User.lastName
         },
         Spot: {
           id: reviewJSON.Spot.id,
@@ -121,14 +121,14 @@ router.get("/current", requireAuth, async (req, res, next) => {
           lng: reviewJSON.Spot.lng,
           name: reviewJSON.Spot.name,
           price: reviewJSON.Spot.price,
-          previewImage: reviewJSON.Spot.previewImage,
+          previewImage: reviewJSON.Spot.previewImage
         },
         ReviewImages: reviewJSON.ReviewImages.map((image) => {
           return {
             id: image.id,
-            url: image.url,
+            url: image.url
           };
-        }),
+        })
       });
     });
 
@@ -148,8 +148,8 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
     return res.status(400).json({
       message: "Validation error",
       errors: {
-        url: "Url is required",
-      },
+        url: "Url is required"
+      }
     });
   }
 
@@ -159,40 +159,40 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
       include: [
         {
           model: ReviewImage,
-          attributes: ["id", "url"],
-        },
-      ],
+          attributes: ["id", "url"]
+        }
+      ]
     });
 
     // review doesn't exist
     if (!existingReview) {
       return res.status(404).json({
-        message: "Review couldn't be found",
+        message: "Review couldn't be found"
       });
     }
 
     // review doesn't belong to user
     if (existingReview.userId !== uid) {
       return res.status(403).json({
-        message: "Forbidden: Review does not belong to current user",
+        message: "Forbidden: Review does not belong to current user"
       });
     }
 
     const reviewImages = await ReviewImage.findAll({
-      where: { reviewId },
+      where: { reviewId }
     });
 
     // check if maxed images - max of 10
     if (reviewImages.length >= 10) {
       return res.status(403).json({
-        message: "Maximum number of images for this resource was reached",
+        message: "Maximum number of images for this resource was reached"
       });
     }
 
     // Now create the new image
     const newImage = await ReviewImage.create({
       url,
-      reviewId,
+      reviewId
     });
 
     res.status(201).json(newImage);
@@ -217,19 +217,19 @@ router.post("/", requireAuth, validateReview, async (req, res, next) => {
     const existingReview = await Review.findOne({
       where: {
         userId,
-        spotId,
-      },
+        spotId
+      }
     });
 
     if (!existingSpot) {
       return res.status(404).json({
-        message: "Spot couldn't be found",
+        message: "Spot couldn't be found"
       });
     }
 
     if (existingReview) {
       return res.status(500).json({
-        message: "User already has a review for this spot",
+        message: "User already has a review for this spot"
       });
     }
 
@@ -237,7 +237,7 @@ router.post("/", requireAuth, validateReview, async (req, res, next) => {
       userId,
       spotId: existingSpot.id,
       review,
-      stars,
+      stars
     });
     return res.json(newReview);
   } catch (error) {
@@ -256,7 +256,7 @@ router.put(
   validateReview,
   async (req, res, next) => {
     const reviewId = req.params.reviewId;
-    console.log(reviewId);
+
     const uid = req.user.id;
     const { review, stars } = req.body;
 
@@ -266,20 +266,20 @@ router.put(
       // check if review exists
       if (!existingReview) {
         return res.status(404).json({
-          message: "Review couldn't be found",
+          message: "Review couldn't be found"
         });
       }
 
       // check if review belongs to user
       if (existingReview.userId !== uid) {
         return res.status(403).json({
-          message: "Forbidden: Review does not belong to current user",
+          message: "Forbidden: Review does not belong to current user"
         });
       }
 
       await existingReview.update({
         review,
-        stars,
+        stars
       });
 
       await existingReview.save();
@@ -304,14 +304,14 @@ router.delete("/:reviewId", requireAuth, async (req, res, next) => {
     // check if review exists
     if (!review) {
       return res.status(404).json({
-        message: "Review couldn't be found",
+        message: "Review couldn't be found"
       });
     }
 
     // check if review belongs to user
     if (review.userId !== uid) {
       return res.status(403).json({
-        message: "Forbidden: Review does not belong to current user",
+        message: "Forbidden: Review does not belong to current user"
       });
     }
 
