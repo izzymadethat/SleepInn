@@ -30,7 +30,7 @@ export const setSpotReviews = (reviews) => {
 };
 
 // Action Functions
-export const addSpot = (spot) => {
+export const addSpotAction = (spot) => {
   return {
     type: ADD_SPOT,
     payload: spot
@@ -62,6 +62,31 @@ export const fetchSpotDetails = (spotId) => (dispatch) => {
     .catch((error) => console.error(error));
 };
 
+export const addSpot = (spotDetails, imageDetails) => async (dispatch) => {
+  try {
+    const response = await csrfFetch("/api/spots", {
+      method: "POST",
+      body: JSON.stringify(spotDetails)
+    });
+
+    const spotData = await response.json();
+    console.log("Spot data that came in: ", spotData);
+    dispatch(addSpotAction(spotData));
+
+    const imageResponse = await csrfFetch(`/api/spots/${spotData.id}/images`, {
+      method: "POST",
+      body: JSON.stringify(imageDetails)
+    });
+
+    const imageData = await imageResponse.json();
+
+    return { spot: spotData, image: imageData };
+  } catch (error) {
+    console.error(error);
+    return error.errors;
+  }
+};
+
 const initialState = {
   byId: {},
   allSpots: [],
@@ -80,7 +105,6 @@ const spotsReducer = (state = initialState, action) => {
     }
 
     case SET_SPOT_DETAILS: {
-      console.log(console.log("Settng spot details: ", action.payload));
       return {
         ...state,
         spotDetails: action.payload || {}
@@ -88,7 +112,6 @@ const spotsReducer = (state = initialState, action) => {
     }
 
     case SET_SPOT_REVIEWS: {
-      console.log(console.log("Settng spot reviews: ", action.payload));
       const updatedSpotDetails = {
         ...state.spotDetails,
         Reviews: action.payload
@@ -97,6 +120,15 @@ const spotsReducer = (state = initialState, action) => {
       return {
         ...state,
         spotDetails: updatedSpotDetails
+      };
+    }
+
+    case ADD_SPOT: {
+      const { byId, allSpots } = _normalizeSpots([action.payload]);
+      return {
+        ...state,
+        byId,
+        allSpots
       };
     }
 
