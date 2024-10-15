@@ -100,10 +100,14 @@ const SpotDetails = () => {
             <h3>${spot.price}/night</h3>
             <div>
               <FaStar />{" "}
-              <span>
-                {spot.avgStarRating} * {spot.numReviews} review
-                {spot.numReviews > 1 && "s"}
-              </span>
+              {reviews.length === 0 ? (
+                <span>New</span>
+              ) : (
+                <span>
+                  {spot.avgStarRating} * {spot.numReviews} review
+                  {spot.numReviews > 1 && "s"}
+                </span>
+              )}
             </div>
           </div>
           <button
@@ -117,17 +121,21 @@ const SpotDetails = () => {
 
       {/* Reviews */}
       <div className="spot-details__review-section">
-        <h2>
-          <FaStar /> {spot.avgStarRating}{" "}
-          <span>
-            * {spot.numReviews} review
-            {spot.numReviews > 1 && "s"}
-          </span>
-        </h2>
-
-        {reviews.length === 0 ? (
-          <p>No reviews yet.</p>
+        {reviews.length == 0 ? (
+          <h2>
+            <FaStar /> New
+          </h2>
         ) : (
+          <h2>
+            <FaStar /> {spot.avgStarRating}{" "}
+            <span>
+              * {spot.numReviews} review
+              {spot.numReviews > 1 && "s"}
+            </span>
+          </h2>
+        )}
+
+        {reviews.length > 0 && (
           <>
             {reviews.map((review) => (
               <div className="review-card">
