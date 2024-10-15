@@ -4,7 +4,7 @@ const {
   ReviewImage,
   Spot,
   User,
-  Sequelize,
+  SpotImage,
 } = require("../../db/models");
 const { check } = require("express-validator");
 const { handleValidationErrors } = require("../../utils/validation");
@@ -29,6 +29,7 @@ const validateReview = [
 ];
 
 const reviewImagesRouter = require("./review-images");
+const { where } = require("sequelize");
 router.use("/:reviewId/images", reviewImagesRouter);
 
 /*
@@ -38,39 +39,100 @@ router.use("/:reviewId/images", reviewImagesRouter);
 ========================================
 */
 router.get("/current", requireAuth, async (req, res, next) => {
-  const uid = req.user.id;
-
+  const userId = req.user.id;
   try {
+    // Fetch all reviews written by the current user
     const reviews = await Review.findAll({
-      where: {
-        userId: uid,
-      },
+      where: { userId: userId },
       include: [
         {
           model: User,
-          attributes: userAttributes,
+          attributes: ["id", "firstName", "lastName"],
         },
         {
           model: Spot,
           attributes: [
-            ...spotAttributes,
-            [
-              Sequelize.literal(
-                `(SELECT "url" FROM "SpotImages" WHERE "SpotImages"."spotId" = "Spot"."id" AND "SpotImages"."preview" = true LIMIT 1)`
-              ),
-              "previewImage",
-            ],
+            "id",
+            "ownerId",
+            "address",
+            "city",
+            "state",
+            "country",
+            "lat",
+            "lng",
+            "name",
+            "price",
+          ],
+          include: [
+            {
+              model: SpotImage,
+              attributes: ["url", "preview"],
+            },
           ],
         },
         {
           model: ReviewImage,
-          as: "ReviewImages",
-          attributes: imageAttributes,
+          attributes: ["id", "url"],
         },
       ],
     });
 
-    res.json({ Reviews: reviews });
+    let reviewsList = [];
+
+    reviews.forEach((review) => {
+      const reviewJSON = review.toJSON();
+
+      // Handle preview image logic for the Spot
+      reviewJSON.Spot.SpotImages.forEach((image) => {
+        if (image.preview === true) {
+          reviewJSON.Spot.previewImage = image.url;
+        }
+      });
+
+      // If no preview image was found, set default message
+      if (!reviewJSON.Spot.previewImage) {
+        reviewJSON.Spot.previewImage = "No preview image available";
+      }
+
+      // Remove SpotImages array from response
+      delete reviewJSON.Spot.SpotImages;
+
+      reviewsList.push({
+        id: reviewJSON.id,
+        userId: reviewJSON.userId,
+        spotId: reviewJSON.spotId,
+        review: reviewJSON.review,
+        stars: reviewJSON.stars,
+        createdAt: reviewJSON.createdAt,
+        updatedAt: reviewJSON.updatedAt,
+        User: {
+          id: reviewJSON.User.id,
+          firstName: reviewJSON.User.firstName,
+          lastName: reviewJSON.User.lastName,
+        },
+        Spot: {
+          id: reviewJSON.Spot.id,
+          ownerId: reviewJSON.Spot.ownerId,
+          address: reviewJSON.Spot.address,
+          city: reviewJSON.Spot.city,
+          state: reviewJSON.Spot.state,
+          country: reviewJSON.Spot.country,
+          lat: reviewJSON.Spot.lat,
+          lng: reviewJSON.Spot.lng,
+          name: reviewJSON.Spot.name,
+          price: reviewJSON.Spot.price,
+          previewImage: reviewJSON.Spot.previewImage,
+        },
+        ReviewImages: reviewJSON.ReviewImages.map((image) => {
+          return {
+            id: image.id,
+            url: image.url,
+          };
+        }),
+      });
+    });
+
+    res.status(200).json({ Reviews: reviewsList });
   } catch (error) {
     next(error);
   }
@@ -171,7 +233,12 @@ router.post("/", requireAuth, validateReview, async (req, res, next) => {
       });
     }
 
-    const newReview = await Review.create({ userId, spotId: existingSpot.id, review, stars });
+    const newReview = await Review.create({
+      userId,
+      spotId: existingSpot.id,
+      review,
+      stars,
+    });
     return res.json(newReview);
   } catch (error) {
     next(error);

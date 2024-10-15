@@ -37,28 +37,81 @@ const validateBooking = [
 */
 
 router.get("/current", requireAuth, async (req, res, next) => {
-  const uid = req.user.id;
+  const userId = req.user.id;
 
   try {
     const bookings = await Booking.findAll({
-      where: { userId: uid },
+      where: { userId: userId },
       include: [
         {
           model: Spot,
           attributes: [
-            ...spotAttributes,
-            [
-              Sequelize.literal(
-                `(SELECT "url" FROM "SpotImages" WHERE "SpotImages"."spotId" = "Spot"."id" AND "SpotImages"."preview" = true LIMIT 1)`
-              ),
-              "previewImage",
-            ],
+            "id",
+            "ownerId",
+            "address",
+            "city",
+            "state",
+            "country",
+            "lat",
+            "lng",
+            "name",
+            "price",
+          ],
+          include: [
+            {
+              model: SpotImage,
+              attributes: ["url", "preview"],
+            },
           ],
         },
       ],
     });
+    let bookingsList = [];
 
-    return res.json({ Bookings: bookings });
+    bookings.forEach((booking) => {
+      const bookingJSON = booking.toJSON();
+
+      bookingJSON.Spot.SpotImages.forEach((image) => {
+        if (image.preview === true) {
+          bookingJSON.Spot.previewImage = image.url;
+        }
+      });
+
+      if (!bookingJSON.Spot.previewImage) {
+        bookingJSON.Spot.previewImage = "No preview image available";
+      }
+
+      delete bookingJSON.Spot.SpotImages;
+
+      // Format the dates to only include the date part (YYYY-MM-DD)
+      const formattedBooking = {
+        id: bookingJSON.id,
+        spotId: bookingJSON.spotId,
+        Spot: {
+          id: bookingJSON.Spot.id,
+          ownerId: bookingJSON.Spot.ownerId,
+          address: bookingJSON.Spot.address,
+          city: bookingJSON.Spot.city,
+          state: bookingJSON.Spot.state,
+          country: bookingJSON.Spot.country,
+          lat: bookingJSON.Spot.lat,
+          lng: bookingJSON.Spot.lng,
+          name: bookingJSON.Spot.name,
+          price: bookingJSON.Spot.price,
+          previewImage: bookingJSON.Spot.previewImage,
+        },
+        userId: bookingJSON.userId,
+        // Use toISOString().split('T')[0] to get the date in YYYY-MM-DD format
+        startDate: bookingJSON.startDate.toISOString().split("T")[0],
+        endDate: bookingJSON.endDate.toISOString().split("T")[0],
+        createdAt: bookingJSON.createdAt,
+        updatedAt: bookingJSON.updatedAt,
+      };
+
+      bookingsList.push(formattedBooking);
+    });
+
+    res.status(200).json({ Bookings: bookingsList });
   } catch (error) {
     next(error);
   }
