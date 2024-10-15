@@ -9,13 +9,11 @@ if (process.env.NODE_ENV === "production") {
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    console.log("Seeding Bookings...");
     try {
       await Booking.bulkCreate(bookingSeed, { validate: true });
     } catch (error) {
       console.log(error);
     }
-    console.log("Finished Seeding Bookings");
   },
 
   async down(queryInterface, Sequelize) {
@@ -30,8 +28,8 @@ module.exports = {
     const spotIds = bookingSeed.map((booking) => booking.spotId);
     await queryInterface.bulkDelete(options, {
       spotId: {
-        [Op.in]: spotIds,
-      },
+        [Op.in]: spotIds
+      }
     });
-  },
+  }
 };

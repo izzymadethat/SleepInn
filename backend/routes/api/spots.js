@@ -233,7 +233,7 @@ router.get("/", validateQueryParams, async (req, res, next) => {
       group: ["Spot.id"]
     });
 
-    res.json({ Spots: spotsList, page, size });
+    res.json({ Spots: spots, page, size });
   } catch (error) {
     next(error);
   }
@@ -313,27 +313,8 @@ router.get("/:spotId", async (req, res, next) => {
 
     if (!spot)
       return res.status(404).json({ message: "Spot couldn't be found" });
-    }
-    // Check if the current user is the owner of the spot
-    if (spot.ownerId !== userId) {
-      return res.status(403).json({
-        message:
-          "Forbidden: You do not have permission to add images to this spot",
-      });
-    }
 
-    const newImage = await SpotImage.create({
-      spotId: spot.id,
-      url,
-      preview,
-    });
-
-    formattedImage = {
-      id: newImage.id,
-      url: newImage.url,
-      preview: newImage.preview,
-    };
-    res.status(201).json(formattedImage);
+    res.json(spot);
   } catch (error) {
     next(error);
   }
@@ -384,7 +365,7 @@ router.post("/:spotId/images", requireAuth, async (req, res, next) => {
     const image = await SpotImage.create({
       spotId: spot.id,
       url,
-      preview
+      preview: preview ?? false
     });
 
     return res.json({ id: image.id, url: image.url, preview: image.preview });

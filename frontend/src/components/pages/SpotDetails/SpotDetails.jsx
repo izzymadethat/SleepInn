@@ -14,7 +14,7 @@ const SpotDetails = () => {
 
   useEffect(() => {
     dispatch(spotActions.fetchSpotDetails(spotId));
-  }, [dispatch]);
+  }, [dispatch, spotId]);
 
   if (!spot) {
     return <div>Loading Spot...</div>;
@@ -138,7 +138,7 @@ const SpotDetails = () => {
         {reviews.length > 0 && (
           <>
             {reviews.map((review) => (
-              <div className="review-card">
+              <div className="review-card" key={review.id}>
                 <div>
                   <h3>{review.User.firstName}</h3>
                   <p>

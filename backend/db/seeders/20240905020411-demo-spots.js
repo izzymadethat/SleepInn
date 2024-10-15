@@ -10,9 +10,7 @@ if (process.env.NODE_ENV === "production") {
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    console.log("Seeding Spots...");
     await Spot.bulkCreate(spotSeed, { validate: true });
-    console.log("Finished Seeding Spots");
   },
 
   async down(queryInterface, Sequelize) {
@@ -21,8 +19,8 @@ module.exports = {
     const addresses = spotSeed.map((spot) => spot.address);
     await queryInterface.bulkDelete(options, {
       name: {
-        [Op.in]: addresses,
-      },
+        [Op.in]: addresses
+      }
     });
-  },
+  }
 };

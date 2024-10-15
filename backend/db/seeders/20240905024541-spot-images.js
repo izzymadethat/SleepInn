@@ -9,13 +9,11 @@ if (process.env.NODE_ENV === "production") {
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    console.log("Seeding SpotImages...");
     await SpotImage.bulkCreate(spotImageSeed, { validate: true });
-    console.log("Finished Seeding SpotImages");
   },
 
   async down(queryInterface, Sequelize) {
     options.tableName = "SpotImages";
     await queryInterface.bulkDelete(options, null, {});
-  },
+  }
 };

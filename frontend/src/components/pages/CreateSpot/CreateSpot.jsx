@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "./CreateSpot.css";
 import { useDispatch, useSelector } from "react-redux";
 import * as spotActions from "../../../store/spots";
@@ -31,8 +31,6 @@ const CreateSpot = () => {
   };
 
   const handleImageChange = (index, value) => {
-    console.log("Image changing!");
-    console.log(index, value);
     const newImages = [...formData.images];
     newImages[index] = value;
     setFormData({ ...formData, images: newImages });
@@ -82,7 +80,7 @@ const CreateSpot = () => {
       </div>
       <form className="create-spot-form" onSubmit={handleSubmit}>
         <div className="form__section-header">
-          <h2>Where's your place located?</h2>
+          <h2>Where&apos;s your place located?</h2>
           <p>
             Guests will only get your exact address once they booked a
             reservation.
@@ -209,8 +207,8 @@ const CreateSpot = () => {
           <div className="form__section-header">
             <h2>Create a title for your spot</h2>
             <p>
-              Catch guests' attention with a spot title that highlights what
-              makes your place special.
+              Catch guests&apos; attention with a spot title that highlights
+              what makes your place special.
             </p>
           </div>
           <input

@@ -6,7 +6,7 @@ const SET_SPOT_DETAILS = "spots/GET_SPOT_DETAILS";
 const SET_SPOT_REVIEWS = "spots/SET_SPOT_REVIEWS";
 const ADD_SPOT_IMAGE = "spots/ADD_SPOT_IMAGE";
 const SET_SPOT_IMAGES = "spots/ADD_SPOT_IMAGE";
-const UPDATE_SPOT = "spots/UPDATE_SPOT";
+// const UPDATE_SPOT = "spots/UPDATE_SPOT";
 const DELETE_SPOT = "spots/DELETE_SPOT";
 
 // Action Creators
@@ -71,7 +71,6 @@ export const fetchSpotDetails = (spotId) => (dispatch) => {
   csrfFetch(`/api/spots/${spotId}`)
     .then((response) => response.json())
     .then((data) => {
-      console.log("Spot details that came in: ", data);
       dispatch(setSpotDetails(data));
     })
     .catch((error) => console.error(error));
@@ -79,7 +78,6 @@ export const fetchSpotDetails = (spotId) => (dispatch) => {
   csrfFetch(`/api/spots/${spotId}/reviews`)
     .then((response) => response.json())
     .then((reviewData) => {
-      console.log("Reviews that came in: ", reviewData);
       dispatch(setSpotReviews(reviewData.Reviews));
     })
     .catch((error) => console.error(error));
@@ -212,6 +210,7 @@ const spotsReducer = (state = initialState, action) => {
       const updatedAllSpots = state.allSpots.filter(
         (spot) => spot.id !== action.payload
       );
+      console.log("Spot Removed", removed);
       return {
         ...state,
         byId: restOfById,

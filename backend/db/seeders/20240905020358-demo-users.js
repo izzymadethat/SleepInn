@@ -10,9 +10,7 @@ if (process.env.NODE_ENV === "production") {
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    console.log("Seeding Users...");
     await User.bulkCreate(userSeed, { validate: true });
-    console.log("Finished Seeding Users");
   },
 
   async down(queryInterface, Sequelize) {
@@ -27,8 +25,8 @@ module.exports = {
     const usernames = userSeed.map((user) => user.username);
     await queryInterface.bulkDelete(options, {
       username: {
-        [Op.in]: usernames,
-      },
+        [Op.in]: usernames
+      }
     });
-  },
+  }
 };

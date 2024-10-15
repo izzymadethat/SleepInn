@@ -30,7 +30,7 @@ if (!isProduction) {
 // helmet helps set a variety of headers to better secure your app
 app.use(
   helmet.crossOriginResourcePolicy({
-    policy: "cross-origin",
+    policy: "cross-origin"
   })
 );
 
@@ -40,8 +40,8 @@ app.use(
     cookie: {
       secure: isProduction,
       sameSite: isProduction && "Lax",
-      httpOnly: true,
-    },
+      httpOnly: true
+    }
   })
 );
 
@@ -85,20 +85,20 @@ app.use((err, _req, res, _next) => {
   if (isProduction) {
     res.json({
       message: err.message,
-      errors: err.errors,
+      errors: err.errors
     });
   } else {
     res.json({
       title: err.title || "Server Error",
       message: err.message,
       errors: err.errors,
-      stack: err.stack,
+      stack: err.stack
     });
   }
 });
 
 process.on("SIGINT", () => {
-  server.close(() => {
+  app.close(() => {
     console.log("Server closed");
     process.exit(0);
   });

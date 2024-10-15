@@ -1,4 +1,4 @@
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./ManageSpots.css";
 import { useSelector } from "react-redux";
 import SpotCard from "../../SpotCard";
