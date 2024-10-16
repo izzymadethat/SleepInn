@@ -1,13 +1,22 @@
-import { useState } from "react";
-import "./CreateSpot.css";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import * as spotActions from "../../../store/spots";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import * as spotActions from "../../store/spots";
+import "./SpotForm.css";
 
-const CreateSpot = () => {
+const SpotForm = () => {
   const navigate = useNavigate();
+  const { spotId } = useParams();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.session.user);
+  const spot = useSelector((state) => state.spots.spotDetails);
+
+  if (!user) {
+    return navigate("/", {
+      state: { error: "Please login to create a spot" },
+      replace: true
+    });
+  }
 
   const [formData, setFormData] = useState({
     country: "",
@@ -24,6 +33,34 @@ const CreateSpot = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [isEdit, setIsEdit] = useState(!!spotId);
+
+  useEffect(() => {
+    if (spotId && isEdit) {
+      dispatch(spotActions.fetchSpotDetails(spotId));
+    }
+  }, [dispatch, spotId, isEdit]);
+
+  useEffect(() => {
+    if (isEdit && spot) {
+      // Populate the form once the spot data is available
+      setFormData({
+        country: spot.country || "",
+        address: spot.address || "",
+        city: spot.city || "",
+        state: spot.state || "",
+        lat: spot.lat ? spot.lat.toString() : "",
+        lng: spot.lng ? spot.lng.toString() : "",
+        description: spot.description || "",
+        name: spot.name || "",
+        price: spot.price ? spot.price.toString() : "",
+        previewImage: spot.SpotImages.find((img) => img.preview)?.url || "",
+        images:
+          spot.SpotImages.filter((img) => !img.preview).map((img) => img.url) ||
+          []
+      });
+    }
+  }, [spot, isEdit]);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -31,6 +68,7 @@ const CreateSpot = () => {
   };
 
   const handleImageChange = (index, value) => {
+    console.log("CHANGING IMAGE", index, value);
     const newImages = [...formData.images];
     newImages[index] = value;
     setFormData({ ...formData, images: newImages });
@@ -45,38 +83,34 @@ const CreateSpot = () => {
       lat: parseFloat(formData.lat),
       lng: parseFloat(formData.lng)
     };
-
     const imageUrls = [formData.previewImage, ...formData.images];
 
     try {
-      const createdSpot = await dispatch(
-        spotActions.addSpot(spotData, imageUrls)
-      );
-
-      if (createdSpot && createdSpot.spot.id) {
-        alert("Spot created successfully!");
-        await dispatch(spotActions.fetchSpots());
-        return navigate(`/spots/${createdSpot.spot.id}`);
+      let modifiedSpot;
+      if (isEdit) {
+        const modifiedSpot = await dispatch(
+          spotActions.updateSpot(spotId, spotData, imageUrls)
+        );
+        if (modifiedSpot) {
+          alert("Spot updated successfully!");
+          navigate(`/spots/${modifiedSpot.spot.id}`);
+        }
+      } else {
+        modifiedSpot = await dispatch(spotActions.addSpot(spotData, imageUrls));
+        if (modifiedSpot && modifiedSpot.spot.id) {
+          alert("Spot created successfully!");
+          navigate(`/spots/${modifiedSpot.spot.id}`);
+        }
       }
     } catch (error) {
+      console.log(error);
       setErrors(error.errors);
     }
   };
-
-  if (!user) {
-    return (
-      <Navigate
-        to={"/"}
-        state={{ error: "Please login to create a spot" }}
-        replace
-      />
-    );
-  }
-
   return (
     <main className="container">
       <div className="container__header">
-        <h1>Create a new Spot</h1>
+        <h1>{isEdit ? "Update your Spot" : "Create a new Spot"}</h1>
       </div>
       <form className="create-spot-form" onSubmit={handleSubmit}>
         <div className="form__section-header">
@@ -96,10 +130,10 @@ const CreateSpot = () => {
             onChange={handleInputChange}
             name="country"
             placeholder="Country"
-            className={errors.country ? "error-input" : ""}
+            className={errors?.country ? "error-input" : ""}
             required
           />
-          {errors.country && <p className="error">{errors.country}</p>}
+          {errors?.country && <p className="error">{errors?.country}</p>}
         </div>
         <div className="form-row">
           <div className="form-group">
@@ -111,10 +145,10 @@ const CreateSpot = () => {
               value={formData.address}
               onChange={handleInputChange}
               placeholder="Address"
-              className={errors.address ? "error-input" : ""}
+              className={errors?.address ? "error-input" : ""}
               required
             />
-            {errors.address && <p className="error">{errors.address}</p>}
+            {errors?.address && <p className="error">{errors?.address}</p>}
           </div>
 
           <div className="form-group">
@@ -126,10 +160,10 @@ const CreateSpot = () => {
               placeholder="City"
               value={formData.city}
               onChange={handleInputChange}
-              className={errors.city ? "error-input" : ""}
+              className={errors?.city ? "error-input" : ""}
               required
             />
-            {errors.city && <p className="error">{errors.city}</p>}
+            {errors?.city && <p className="error">{errors?.city}</p>}
           </div>
 
           <div className="form-group">
@@ -141,10 +175,10 @@ const CreateSpot = () => {
               value={formData.state}
               onChange={handleInputChange}
               placeholder="State"
-              className={errors.state ? "error-input" : ""}
+              className={errors?.state ? "error-input" : ""}
               required
             />
-            {errors.state && <p className="error">{errors.state}</p>}
+            {errors?.state && <p className="error">{errors?.state}</p>}
           </div>
         </div>
         <div className="form-row">
@@ -158,9 +192,9 @@ const CreateSpot = () => {
               value={formData.lat}
               onChange={handleInputChange}
               placeholder="Latitude"
-              className={errors.lat ? "error-input" : ""}
+              className={errors?.lat ? "error-input" : ""}
             />
-            {errors.lat && <p className="error">{errors.lat}</p>}
+            {errors?.lat && <p className="error">{errors?.lat}</p>}
           </div>
 
           <div className="form-group">
@@ -173,9 +207,9 @@ const CreateSpot = () => {
               value={formData.lng}
               onChange={handleInputChange}
               placeholder="Longitude"
-              className={errors.lng ? "error-input" : ""}
+              className={errors?.lng ? "error-input" : ""}
             />
-            {errors.lng && <p className="error">{errors.lng}</p>}
+            {errors?.lng && <p className="error">{errors?.lng}</p>}
           </div>
         </div>
 
@@ -196,10 +230,12 @@ const CreateSpot = () => {
             placeholder="Please write at least 30 characters"
             value={formData.description}
             onChange={handleInputChange}
-            className={errors.description ? "error-input" : ""}
+            className={errors?.description ? "error-input" : ""}
             required
           ></textarea>
-          {errors.description && <p className="error">{errors.description}</p>}
+          {errors?.description && (
+            <p className="error">{errors?.description}</p>
+          )}
         </div>
 
         <hr />
@@ -218,10 +254,10 @@ const CreateSpot = () => {
             value={formData.name}
             onChange={handleInputChange}
             placeholder="Name of your spot"
-            className={errors.name ? "error-input" : ""}
+            className={errors?.name ? "error-input" : ""}
             required
           />
-          {errors.name && <p className="error">{errors.name}</p>}
+          {errors?.name && <p className="error">{errors?.name}</p>}
         </div>
 
         <hr />
@@ -240,10 +276,10 @@ const CreateSpot = () => {
             value={formData.price}
             onChange={handleInputChange}
             placeholder="Price per night (USD)"
-            className={errors.price ? "error-input" : ""}
+            className={errors?.price ? "error-input" : ""}
             required
           />
-          {errors.price && <p className="error">{errors.price}</p>}
+          {errors?.price && <p className="error">{errors?.price}</p>}
         </div>
         <hr />
         <div className="form__section-header">
@@ -259,11 +295,11 @@ const CreateSpot = () => {
             value={formData.previewImage}
             onChange={handleInputChange}
             placeholder="Preview Image URL"
-            className={errors.previewImage ? "error-input" : ""}
+            className={errors?.previewImage ? "error-input" : ""}
             required
           />
-          {errors.previewImage && (
-            <p className="error">{errors.previewImage}</p>
+          {errors?.previewImage && (
+            <p className="error">{errors?.previewImage}</p>
           )}
         </div>
 
@@ -275,6 +311,7 @@ const CreateSpot = () => {
             id="image-1"
             name="image-1"
             placeholder="Image URL"
+            value={formData.images[0] || ""}
             onChange={(e) => handleImageChange(0, e.target.value)}
           />
         </div>
@@ -285,6 +322,7 @@ const CreateSpot = () => {
             id="image-2"
             name="image-2"
             placeholder="Image URL"
+            value={formData.images[1] || ""}
             onChange={(e) => handleImageChange(1, e.target.value)}
           />
         </div>
@@ -295,16 +333,17 @@ const CreateSpot = () => {
             id="image-3"
             name="image-3"
             placeholder="Image URL"
+            value={formData.images[2] || ""}
             onChange={(e) => handleImageChange(2, e.target.value)}
           />
         </div>
         <hr />
         <button type="submit" className="submit-btn">
-          Create Spot
+          {isEdit ? "Update Spot" : "Create Spot"}
         </button>
       </form>
     </main>
   );
 };
 
-export default CreateSpot;
+export default SpotForm;
