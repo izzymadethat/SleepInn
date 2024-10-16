@@ -21,7 +21,7 @@ const SpotCard = ({ spot }) => {
             </h3>
             <div className="spot-card__rating">
               <FaStar />
-              {spot.avgRating ?? "New"}
+              {spot.avgRating ? spot.avgRating.toFixed(1) : "New"}
             </div>
           </div>
           <p className="spot-card__price">${spot.price} / night</p>

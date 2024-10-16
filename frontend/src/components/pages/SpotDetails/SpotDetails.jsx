@@ -8,9 +8,11 @@ import * as spotActions from "../../../store/spots";
 const SpotDetails = () => {
   const { spotId } = useParams();
   const dispatch = useDispatch();
+  const currentUser = useSelector((state) => state.session.user);
   const spot = useSelector((state) => state.spots.spotDetails);
   const reviews = spot?.Reviews || [];
   const mainImage = spot?.SpotImages.filter((img) => img.preview)[0];
+  const isSpotOwner = spot?.Owner?.id === currentUser?.id;
 
   useEffect(() => {
     dispatch(spotActions.fetchSpotDetails(spotId));
@@ -103,7 +105,11 @@ const SpotDetails = () => {
                 <span>New</span>
               ) : (
                 <span>
-                  {spot.avgStarRating} * {spot.numReviews} review
+                  {spot.avgStarRating?.toFixed(1)}{" "}
+                  <span style={{ position: "relative", bottom: ".375rem" }}>
+                    .
+                  </span>{" "}
+                  {spot.numReviews} review
                   {spot.numReviews > 1 && "s"}
                 </span>
               )}
@@ -120,15 +126,21 @@ const SpotDetails = () => {
 
       {/* Reviews */}
       <div className="spot-details__review-section">
-        {reviews.length == 0 ? (
-          <h2>
-            <FaStar /> New
-          </h2>
+        {reviews.length === 0 ? (
+          <>
+            <h2>
+              <FaStar /> New
+            </h2>
+            {currentUser && !isSpotOwner && (
+              <p>Be the first to review this spot!</p>
+            )}
+          </>
         ) : (
           <h2>
             <FaStar /> {spot.avgStarRating}{" "}
             <span>
-              * {spot.numReviews} review
+              <span style={{ position: "relative", bottom: ".375rem" }}>.</span>{" "}
+              {spot.numReviews} review
               {spot.numReviews > 1 && "s"}
             </span>
           </h2>
