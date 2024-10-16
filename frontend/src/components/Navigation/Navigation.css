@@ -10,6 +10,27 @@
   margin-bottom: 20px;
 }
 
+.nav-bar .logo {
+  display: flex;
+  align-items: center;
+  font-size: 2rem;
+}
+
+.logo svg {
+  font-size: 4rem;
+  color: #ff6f61;
+}
+
+.logo span .primary {
+  color: #ff6f61;
+  text-transform: uppercase;
+}
+
+.logo .flip {
+  display: inline-block;
+  transform: scale(-1, 1);
+}
+
 .nav-bar li {
   list-style: none;
 }

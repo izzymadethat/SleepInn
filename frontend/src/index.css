@@ -103,3 +103,7 @@ container h1 {
   background-color: #ccc; /* No hover effect for disabled */
   cursor: not-allowed; /* Maintain not-allowed cursor */
 }
+
+.primary {
+  color: #ff6f61;
+}
