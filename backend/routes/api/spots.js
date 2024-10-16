@@ -406,18 +406,7 @@ router.put("/:spotId", requireAuth, validateSpot, async (req, res, next) => {
     });
     await spot.save();
 
-    res.json({
-      id: spot.id,
-      address,
-      city,
-      state,
-      country,
-      lat,
-      lng,
-      name,
-      description,
-      price
-    });
+    res.json(spot);
   } catch (error) {
     next(error);
   }
