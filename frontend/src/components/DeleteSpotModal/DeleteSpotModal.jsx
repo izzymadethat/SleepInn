@@ -26,13 +26,23 @@ const DeleteSpotModal = ({ spot }) => {
       <div
         style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}
       >
-        <button onClick={handleDeleteSpot} className="site-btn primary">
+        <button
+          onClick={handleDeleteSpot}
+          className="site-btn primary"
+          style={{ backgroundColor: "red" }}
+        >
           Yes (Delete Spot)
         </button>
         <button
           onClick={closeModal}
           className="site-btn secondary"
-          style={{ width: "100%", maxWidth: "100%" }}
+          style={{
+            width: "100%",
+            maxWidth: "100%",
+            backgroundColor: "gray",
+            color: "white",
+            border: "none"
+          }}
         >
           No (Keep Spot)
         </button>
