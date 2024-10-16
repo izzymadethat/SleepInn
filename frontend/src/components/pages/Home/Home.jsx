@@ -15,7 +15,9 @@ const Home = () => {
   return (
     <main>
       <div className="home-container">
-        <h1>Sleep only where you can dream.</h1>
+        <h1>
+          Sleep only where you can <span className="primary">dream.</span>
+        </h1>
         <div className="spots-grid">
           {spots.map((spot) => (
             <SpotCard spot={spot} key={spot.id} />

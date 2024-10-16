@@ -21,8 +21,8 @@ const DeleteSpotModal = ({ spot }) => {
 
   return (
     <>
-      <h1>Are You Sure You Want to Delete this Spot?</h1>
-      <p>This action cannot be undone.</p>
+      <h1>Confirm Delete</h1>
+      <p>Are You Sure You Want to Delete this Spot?</p>
       <div
         style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}
       >

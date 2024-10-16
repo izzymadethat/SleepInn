@@ -83,7 +83,6 @@ export const fetchSpotDetails = (spotId) => async (dispatch) => {
     const reviewResponse = await csrfFetch(`/api/spots/${spotId}/reviews`);
     const reviewData = await reviewResponse.json();
 
-    console.log("DATA COMING FROM SPOT", data);
     dispatch(setSpotReviews(reviewData.Reviews));
 
     return { spot: data };
@@ -216,9 +215,13 @@ const spotsReducer = (state = initialState, action) => {
     }
 
     case SET_SPOT_REVIEWS: {
+      const sortedReviews = action.payload.sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
       const updatedSpotDetails = {
         ...state.spotDetails,
-        Reviews: action.payload
+        Reviews: sortedReviews
       };
 
       return {
@@ -276,10 +279,11 @@ const spotsReducer = (state = initialState, action) => {
 
     case DELETE_SPOT: {
       const { [action.payload]: removed, ...restOfById } = state.byId;
+      console.log(removed);
       const updatedAllSpots = state.allSpots.filter(
         (spot) => spot.id !== action.payload
       );
-      console.log("Spot Removed", removed);
+
       return {
         ...state,
         byId: restOfById,

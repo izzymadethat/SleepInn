@@ -2,24 +2,89 @@ import { FaStar } from "react-icons/fa6";
 import "./SpotDetails.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as spotActions from "../../../store/spots";
+import * as reviewActions from "../../../store/reviews";
+import OpenModalButton from "../../OpenModalButton";
+import ReviewModal from "../../ReviewModal";
+import { useModal } from "../../../context/Modal";
+
+const DeleteReviewModal = ({ spotId, review }) => {
+  const dispatch = useDispatch();
+  const { closeModal } = useModal();
+
+  const handleDeleteReview = () => {
+    const isRemoved = dispatch(reviewActions.removeReview(spotId, review.id));
+    if (isRemoved) {
+      alert("Review Deleted");
+      dispatch(reviewActions.fetchReviews(spotId));
+      dispatch(spotActions.fetchSpotDetails(spotId));
+      closeModal();
+    } else {
+      alert("Uh-oh. Something went wrong");
+    }
+  };
+
+  return (
+    <>
+      <h1>Confirm Delete</h1>
+      <p>Are you sure you want to delete this review?</p>
+      <div
+        style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}
+      >
+        <button
+          onClick={handleDeleteReview}
+          className="site-btn primary"
+          style={{ backgroundColor: "red" }}
+        >
+          Yes (Delete Review)
+        </button>
+        <button
+          onClick={closeModal}
+          className="site-btn secondary"
+          style={{
+            width: "100%",
+            maxWidth: "100%",
+            backgroundColor: "gray",
+            color: "white",
+            border: "none"
+          }}
+        >
+          No (Keep Review)
+        </button>
+      </div>
+    </>
+  );
+};
 
 const SpotDetails = () => {
+  const [loading, setLoading] = useState(true);
   const { spotId } = useParams();
+  const { closeModal } = useModal();
   const dispatch = useDispatch();
   const currentUser = useSelector((state) => state.session.user);
   const spot = useSelector((state) => state.spots.spotDetails);
-  const reviews = spot?.Reviews || [];
+  const reviewsBySpot = useSelector((state) => state.reviews.reviewsBySpot);
+  const reviews = reviewsBySpot[spotId] || [];
   const mainImage = spot?.SpotImages.filter((img) => img.preview)[0];
   const isSpotOwner = spot?.Owner?.id === currentUser?.id;
 
+  const userHasReviewed = reviews.some(
+    (review) => review.userId === currentUser?.id
+  );
+
   useEffect(() => {
-    dispatch(spotActions.fetchSpotDetails(spotId));
+    const fetchData = async () => {
+      setLoading(true);
+      await dispatch(spotActions.fetchSpotDetails(spotId));
+      await dispatch(reviewActions.fetchReviews(spotId));
+      setLoading(false);
+    };
+    fetchData();
   }, [dispatch, spotId]);
 
-  if (!spot) {
-    return <div>Loading Spot...</div>;
+  if (loading) {
+    return <div>Loading...</div>;
   }
 
   return (
@@ -131,13 +196,20 @@ const SpotDetails = () => {
             <h2>
               <FaStar /> New
             </h2>
-            {currentUser && !isSpotOwner && (
-              <p>Be the first to review this spot!</p>
+            {currentUser && !isSpotOwner && !userHasReviewed && (
+              <div>
+                <OpenModalButton
+                  buttonText={"Post Your Review"}
+                  modalComponent={<ReviewModal spotId={spotId} />}
+                  className="site-btn secondary"
+                />
+                <p>Be the first to review this spot!</p>
+              </div>
             )}
           </>
         ) : (
           <h2>
-            <FaStar /> {spot.avgStarRating}{" "}
+            <FaStar /> {spot.avgStarRating.toFixed(1)}{" "}
             <span>
               <span style={{ position: "relative", bottom: ".375rem" }}>.</span>{" "}
               {spot.numReviews} review
@@ -148,6 +220,16 @@ const SpotDetails = () => {
 
         {reviews.length > 0 && (
           <>
+            {currentUser && !isSpotOwner && !userHasReviewed && (
+              <div>
+                <OpenModalButton
+                  buttonText={"Post Your Review"}
+                  modalComponent={<ReviewModal spotId={spotId} />}
+                  className="site-btn secondary"
+                  style={{ margin: "0.625rem 0" }}
+                />
+              </div>
+            )}
             {reviews.map((review) => (
               <div className="review-card" key={review.id}>
                 <div>
@@ -160,6 +242,32 @@ const SpotDetails = () => {
                   </p>
                 </div>
                 <p>{review.review}</p>
+                {review.userId === currentUser?.id && (
+                  <div className="review-actions">
+                    <OpenModalButton
+                      buttonText="Edit Review"
+                      modalComponent={
+                        <>
+                          <h1>Feature Coming Soon!</h1>
+                          <button
+                            onClick={closeModal}
+                            className="site-btn secondary"
+                          >
+                            Close
+                          </button>
+                        </>
+                      }
+                      className="site-btn secondary"
+                    />
+                    <OpenModalButton
+                      buttonText={"Delete Review"}
+                      modalComponent={
+                        <DeleteReviewModal review={review} spotId={spotId} />
+                      }
+                      className="site-btn danger"
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </>

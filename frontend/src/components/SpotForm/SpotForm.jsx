@@ -10,14 +10,6 @@ const SpotForm = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.session.user);
   const spot = useSelector((state) => state.spots.spotDetails);
-
-  if (!user) {
-    return navigate("/", {
-      state: { error: "Please login to create a spot" },
-      replace: true
-    });
-  }
-
   const [formData, setFormData] = useState({
     country: "",
     address: "",
@@ -31,9 +23,8 @@ const SpotForm = () => {
     previewImage: "",
     images: []
   });
-
+  const [isEdit] = useState(!!spotId);
   const [errors, setErrors] = useState({});
-  const [isEdit, setIsEdit] = useState(!!spotId);
 
   useEffect(() => {
     if (spotId && isEdit) {
@@ -61,6 +52,13 @@ const SpotForm = () => {
       });
     }
   }, [spot, isEdit]);
+
+  if (!user) {
+    return navigate("/", {
+      state: { error: "Please login to create a spot" },
+      replace: true
+    });
+  }
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;

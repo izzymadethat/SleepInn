@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 import ProfileButton from "./ProfileButton";
 import "./Navigation.css";
+import { IoBed } from "react-icons/io5";
 
 const Navigation = ({ isLoaded }) => {
   const sessionUser = useSelector((state) => state.session.user);
@@ -9,7 +10,15 @@ const Navigation = ({ isLoaded }) => {
   return (
     <nav className="nav-bar">
       <li>
-        <NavLink to="/">SleepInn</NavLink>
+        <NavLink to="/" className="logo">
+          <IoBed />
+          <span>
+            Sleep
+            <span className="primary">
+              I<span className="flip">nn</span>
+            </span>
+          </span>
+        </NavLink>
       </li>
       {isLoaded && (
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>

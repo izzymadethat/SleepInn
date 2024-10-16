@@ -91,3 +91,19 @@ container h1 {
   max-width: 200px;
   transition: all 0.2s ease-in-out;
 }
+
+.site-btn:disabled {
+  background-color: #ccc; /* Gray background for disabled */
+  color: #666; /* Dark gray text for disabled */
+  cursor: not-allowed; /* Not-allowed cursor for disabled buttons */
+  opacity: 0.7; /* Slightly transparent effect */
+}
+
+.site-btn:disabled:hover {
+  background-color: #ccc; /* No hover effect for disabled */
+  cursor: not-allowed; /* Maintain not-allowed cursor */
+}
+
+.primary {
+  color: #ff6f61;
+}
