@@ -1,0 +1,57 @@
+.review-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 3rem;
+  max-width: 100%;
+}
+
+.review-modal h2 {
+  font-weight: 800;
+  font-size: 1.875rem;
+}
+
+.review-modal form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.875rem;
+}
+
+.review-modal textarea {
+  width: 100%;
+  height: 10rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+  font-size: 1.125rem;
+}
+
+.review-modal textarea::placeholder {
+  color: gray;
+}
+
+.review-modal .rating-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.review-modal .rating-container .star {
+  cursor: pointer;
+  font-size: 2.25rem;
+  color: lightgray;
+  transition: color 0.2s;
+}
+
+.review-modal .rating-container .star.filled {
+  color: #ff5f61;
+}
+
+.review-modal .rating-container label {
+  font-size: 2rem;
+  font-weight: 700;
+  cursor: pointer;
+}
