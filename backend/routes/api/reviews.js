@@ -23,8 +23,8 @@ const validateReview = [
   check("stars")
     .exists({ checkFalsy: true })
     .isInt({ min: 1, max: 5 })
-    .withMessage("Stars must be an integer from 1 to 5")
-    .toInt(10),
+    .withMessage("Stars must be an integer from 1 to 5"),
+
   handleValidationErrors
 ];
 
@@ -209,6 +209,7 @@ router.post("/:reviewId/images", requireAuth, async (req, res, next) => {
 */
 router.post("/", requireAuth, validateReview, async (req, res, next) => {
   const spotId = req.params.spotId;
+  console.log("Spot Id ", spotId);
   const userId = req.user.id;
   const { review, stars } = req.body;
 
@@ -233,12 +234,15 @@ router.post("/", requireAuth, validateReview, async (req, res, next) => {
       });
     }
 
+    const starsInt = parseInt(stars, 10);
+
     const newReview = await Review.create({
-      userId,
-      spotId: existingSpot.id,
+      userId: Number(userId),
+      spotId,
       review,
-      stars
+      stars: starsInt
     });
+
     return res.json(newReview);
   } catch (error) {
     next(error);
