@@ -279,6 +279,7 @@ const spotsReducer = (state = initialState, action) => {
 
     case DELETE_SPOT: {
       const { [action.payload]: removed, ...restOfById } = state.byId;
+      console.log(removed);
       const updatedAllSpots = state.allSpots.filter(
         (spot) => spot.id !== action.payload
       );
