@@ -54,6 +54,7 @@ const ReviewModal = ({ spotId }) => {
   return (
     <div className="review-modal">
       <h2>How was your stay?</h2>
+      {errors && errors.errors && (<p className="error">Something went wrong. Please try again.</p>)}
       <form onSubmit={handleSubmit}>
         <textarea
           cols={50}

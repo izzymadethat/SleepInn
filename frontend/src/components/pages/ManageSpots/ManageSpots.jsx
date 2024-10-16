@@ -13,16 +13,16 @@ const ManageSpots = () => {
   const user = useSelector((state) => state.session.user);
   const spots = useSelector((state) => state.spots.allSpots);
 
+  useEffect(() => {
+    dispatch(spotActions.fetchSpots());
+  }, [dispatch]);
+
   if (!user) {
     return navigate("/", {
       state: { error: "You must be logged in to manage your spots" },
       replace: true
     });
   }
-
-  useEffect(() => {
-    dispatch(spotActions.fetchSpots());
-  }, [dispatch]);
 
   const userSpots = spots.filter((spot) => spot.ownerId === user.id);
 
@@ -33,7 +33,7 @@ const ManageSpots = () => {
           <h1>Manage Your Spots</h1>
         </div>
         <div className="empty-spots">
-          <p>You haven't created any spots yet.</p>
+          <p>You haven&apos;t created any spots yet.</p>
           <Link to="/spots/new" className="site-btn secondary">
             Create a New Spot
           </Link>
