@@ -1,12 +1,15 @@
 import { Link, useNavigate } from "react-router-dom";
 import "./ManageSpots.css";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import SpotCard from "../../SpotCard";
 import OpenModalButton from "../../OpenModalButton";
 import DeleteSpotModal from "../../DeleteSpotModal";
+import { useEffect } from "react";
+import * as spotActions from "../../../store/spots";
 
 const ManageSpots = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const user = useSelector((state) => state.session.user);
   const spots = useSelector((state) => state.spots.allSpots);
 
@@ -17,7 +20,28 @@ const ManageSpots = () => {
     });
   }
 
+  useEffect(() => {
+    dispatch(spotActions.fetchSpots());
+  }, [dispatch]);
+
   const userSpots = spots.filter((spot) => spot.ownerId === user.id);
+
+  if (userSpots.length === 0) {
+    return (
+      <main className="container">
+        <div className="container__header">
+          <h1>Manage Your Spots</h1>
+        </div>
+        <div className="empty-spots">
+          <p>You haven't created any spots yet.</p>
+          <Link to="/spots/new" className="site-btn secondary">
+            Create a New Spot
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="container">
       <div className="container__header">
