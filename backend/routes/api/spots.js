@@ -229,8 +229,7 @@ router.get("/", validateQueryParams, async (req, res, next) => {
           model: SpotImage,
           attributes: []
         }
-      ],
-      group: ["Spot.id"]
+      ]
     });
 
     res.json({ Spots: spots, page, size });
@@ -266,8 +265,7 @@ router.get("/current", requireAuth, async (req, res, next) => {
           model: SpotImage,
           attributes: [] // We don't need to include SpotImage attributes in the result
         }
-      ],
-      group: ["Spot.id"] // Group by spot ID to get aggregate values per spot
+      ]
     });
 
     res.json({ Spots: spots });
