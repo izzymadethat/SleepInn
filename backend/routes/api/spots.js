@@ -12,7 +12,7 @@ const bookingsRouter = require("./booking");
 const reviewsRouter = require("./reviews");
 
 const { requireAuth } = require("../../utils/auth");
-const { Op, fn, col, Sequelize } = require("sequelize");
+const { Op, fn, col, Sequelize, where } = require("sequelize");
 const { check, query, body } = require("express-validator");
 query;
 const { handleValidationErrors } = require("../../utils/validation");
@@ -142,6 +142,35 @@ const validateSpotImage = [
     .withMessage("Preview is required")
 ];
 
+async function getAvgRating(spotId) {
+  const reviews = await Review.findAll({
+    where: { spotId }
+  });
+
+  if (reviews.length === 0) return null;
+
+  const avgRating =
+    reviews.reduce((acc, review) => acc + review.stars, 0) / reviews.length;
+  return avgRating;
+}
+
+async function getPreviewImage(spotId) {
+  const image = await SpotImage.findOne({
+    where: { spotId, preview: true },
+    limit: 1
+  });
+
+  return image ? image.url : null;
+}
+
+async function getNumReviews(spotId) {
+  const count = await Review.count({
+    where: { spotId }
+  });
+
+  return count; // Return the total number of reviews
+}
+
 router.use("/:spotId/bookings", bookingsRouter);
 router.use("/:spotId/reviews", reviewsRouter);
 
@@ -154,6 +183,7 @@ router.get("/", validateQueryParams, async (req, res, next) => {
   const offset = page ? (page - 1) * size : 0;
   const where = {};
 
+  // Apply filters based on the query parameters
   if (minLat !== undefined && maxLat !== undefined) {
     where.lat = {
       [Op.between]: [minLat, maxLat]
@@ -201,38 +231,35 @@ router.get("/", validateQueryParams, async (req, res, next) => {
       where,
       limit,
       offset,
-      attributes: [
-        ...spotAttributes,
-        "createdAt",
-        "updatedAt",
-        [
-          sequelize.literal(
-            '(SELECT AVG("stars") FROM "Reviews" WHERE "Reviews"."spotId" = "Spot"."id")'
-          ),
-          "avgRating"
-        ],
-        [
-          sequelize.literal(
-            `(SELECT "url" FROM "SpotImages" WHERE "SpotImages"."spotId" = "Spot"."id")`
-          ),
-          "previewImage"
-        ]
-        // for some reason, had to add like this
-      ],
-
+      attributes: [...spotAttributes, "createdAt", "updatedAt"],
       include: [
         {
-          model: Review,
-          attributes: []
+          model: User,
+          as: "Owner",
+          attributes: userAttributes
         },
         {
           model: SpotImage,
-          attributes: []
+          attributes: [...imageAttributes, "preview"]
         }
       ]
     });
 
-    res.json({ Spots: spots, page, size });
+    // Map each spot to include avgRating and previewImage
+    const spotsWithDetails = await Promise.all(
+      spots.map(async (spot) => {
+        const avgRating = await getAvgRating(spot.id);
+        const previewImage = await getPreviewImage(spot.id);
+
+        return {
+          ...spot.get(), // Spread the spot attributes
+          avgRating,
+          previewImage
+        };
+      })
+    );
+
+    res.json({ Spots: spotsWithDetails, page, size });
   } catch (error) {
     next(error);
   }
@@ -244,29 +271,14 @@ router.get("/current", requireAuth, async (req, res, next) => {
   try {
     const spots = await Spot.findAll({
       where: { ownerId },
-      attributes: {
-        include: [
-          // Calculate average rating
-          [Sequelize.fn("AVG", col("Reviews.stars")), "avgRating"],
-          [
-            sequelize.literal(
-              `(SELECT "url" FROM "SpotImages" WHERE "SpotImages"."spotId" = "Spot"."id")`
-            ),
-            "previewImage"
-          ]
-        ]
-      },
-      include: [
-        {
-          model: Review,
-          attributes: [] // We don't need to include Review attributes in the result
-        },
-        {
-          model: SpotImage,
-          attributes: [] // We don't need to include SpotImage attributes in the result
-        }
-      ]
+      attributes: [...spotAttributes, "createdAt", "updatedAt"],
+      include: []
     });
+
+    for (const spot of spots) {
+      spot.avgRating = await getAvgRating(spot.id);
+      spot.previewImage = await getPreviewImage(spot.id);
+    }
 
     res.json({ Spots: spots });
   } catch (error) {
@@ -279,22 +291,6 @@ router.get("/:spotId", async (req, res, next) => {
   const spotId = req.params.spotId;
   try {
     const spot = await Spot.findByPk(spotId, {
-      attributes: {
-        include: [
-          [
-            sequelize.literal(
-              `(SELECT AVG("stars") FROM "Reviews" WHERE "Reviews"."spotId" = "Spot"."id")`
-            ),
-            "avgStarRating"
-          ],
-          [
-            sequelize.literal(
-              `(SELECT COUNT("id") FROM "Reviews" WHERE "Reviews"."spotId" = "Spot"."id")`
-            ),
-            "numReviews"
-          ]
-        ]
-      },
       include: [
         {
           model: User,
@@ -311,7 +307,34 @@ router.get("/:spotId", async (req, res, next) => {
     if (!spot)
       return res.status(404).json({ message: "Spot couldn't be found" });
 
-    res.json(spot);
+    const spotResponse = {
+      id: spot.id,
+      ownerId: spot.ownerId,
+      address: spot.address,
+      city: spot.city,
+      state: spot.state,
+      lat: spot.lat,
+      lng: spot.lng,
+      name: spot.name,
+      description: spot.description,
+      price: spot.price,
+      createdAt: spot.createdAt,
+      updatedAt: spot.updatedAt,
+      Owner: {
+        id: spot.Owner.id,
+        firstName: spot.Owner.firstName,
+        lastName: spot.Owner.lastName
+      },
+      SpotImages: spot.SpotImages.map((image) => ({
+        id: image.id,
+        url: image.url,
+        preview: image.preview
+      })),
+      numReviews: await getNumReviews(spot.id),
+      avgStarRating: await getAvgRating(spot.id)
+    };
+
+    res.json(spotResponse);
   } catch (error) {
     next(error);
   }

@@ -78,6 +78,8 @@ export const fetchSpotDetails = (spotId) => async (dispatch) => {
     const response = await csrfFetch(`/api/spots/${spotId}`);
     const data = await response.json();
 
+    console.log("DATA FROM FETCH SPOT DETAILS", data);
+
     dispatch(setSpotDetails(data));
 
     const reviewResponse = await csrfFetch(`/api/spots/${spotId}/reviews`);
@@ -94,15 +96,14 @@ export const fetchSpotDetails = (spotId) => async (dispatch) => {
 
 export const addSpot = (spotDetails, imageUrls) => async (dispatch) => {
   try {
-    // Create the spot first so that I can have a spot id to add to image
     const response = await csrfFetch("/api/spots", {
       method: "POST",
       body: JSON.stringify(spotDetails)
     });
+
     const spotData = await response.json();
     dispatch(addSpotAction(spotData));
 
-    // Upload all images for the spot
     for (const url of imageUrls) {
       const imgDetails = {
         url,
@@ -110,21 +111,15 @@ export const addSpot = (spotDetails, imageUrls) => async (dispatch) => {
         preview: url === imageUrls[0]
       };
 
-      const imageResponse = await csrfFetch(
-        `/api/spots/${spotData.id}/images`,
-        {
-          method: "POST",
-          body: JSON.stringify(imgDetails)
-        }
-      );
-
-      const imageData = await imageResponse.json();
-      dispatch(addSpotImage(imageData));
+      await csrfFetch(`/api/spots/${spotData.id}/images`, {
+        method: "POST",
+        body: JSON.stringify(imgDetails)
+      });
     }
     return { spot: spotData };
   } catch (error) {
     console.error(error);
-    return error.errors;
+    throw error;
   }
 };
 
@@ -208,6 +203,7 @@ const spotsReducer = (state = initialState, action) => {
     }
 
     case SET_SPOT_DETAILS: {
+      console.log("SPOT DETAILS", action.payload);
       return {
         ...state,
         spotDetails: action.payload || {}

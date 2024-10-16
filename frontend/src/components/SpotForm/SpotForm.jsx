@@ -84,27 +84,20 @@ const SpotForm = () => {
     const imageUrls = [formData.previewImage, ...formData.images];
 
     try {
-      let modifiedSpot;
       if (isEdit) {
-        const modifiedSpot = await dispatch(
-          spotActions.updateSpot(spotId, spotData, imageUrls)
-        );
-        if (modifiedSpot) {
-          alert("Spot updated successfully!");
-          navigate(`/spots/${modifiedSpot.spot.id}`);
-        }
+        await dispatch(spotActions.updateSpot(spotId, spotData, imageUrls));
+        await dispatch(spotActions.fetchSpotDetails(spotId));
+        navigate(`/spots/${spotId}`);
       } else {
-        modifiedSpot = await dispatch(spotActions.addSpot(spotData, imageUrls));
-        if (modifiedSpot && modifiedSpot.spot.id) {
-          alert("Spot created successfully!");
-          navigate(`/spots/${modifiedSpot.spot.id}`);
-        }
+        const res = await dispatch(spotActions.addSpot(spotData, imageUrls));
+        navigate(`/spots/${res.spot.id}`); // Ensure you're referencing the correct property
       }
     } catch (error) {
-      console.log(error);
-      setErrors(error.errors);
+      const errorRes = await error.json();
+      setErrors(errorRes.errors || {});
     }
   };
+
   return (
     <main className="container">
       <div className="container__header">
@@ -128,10 +121,10 @@ const SpotForm = () => {
             onChange={handleInputChange}
             name="country"
             placeholder="Country"
-            className={errors?.country ? "error-input" : ""}
+            className={errors.country ? "error-input" : ""}
             required
           />
-          {errors?.country && <p className="error">{errors?.country}</p>}
+          {errors.country && <p className="error">{errors.country}</p>}
         </div>
         <div className="form-row">
           <div className="form-group">
@@ -143,10 +136,10 @@ const SpotForm = () => {
               value={formData.address}
               onChange={handleInputChange}
               placeholder="Address"
-              className={errors?.address ? "error-input" : ""}
+              className={errors.address ? "error-input" : ""}
               required
             />
-            {errors?.address && <p className="error">{errors?.address}</p>}
+            {errors.address && <p className="error">{errors.address}</p>}
           </div>
 
           <div className="form-group">
@@ -158,10 +151,10 @@ const SpotForm = () => {
               placeholder="City"
               value={formData.city}
               onChange={handleInputChange}
-              className={errors?.city ? "error-input" : ""}
+              className={errors.city ? "error-input" : ""}
               required
             />
-            {errors?.city && <p className="error">{errors?.city}</p>}
+            {errors.city && <p className="error">{errors.city}</p>}
           </div>
 
           <div className="form-group">
@@ -173,10 +166,10 @@ const SpotForm = () => {
               value={formData.state}
               onChange={handleInputChange}
               placeholder="State"
-              className={errors?.state ? "error-input" : ""}
+              className={errors.state ? "error-input" : ""}
               required
             />
-            {errors?.state && <p className="error">{errors?.state}</p>}
+            {errors.state && <p className="error">{errors.state}</p>}
           </div>
         </div>
         <div className="form-row">
@@ -190,9 +183,9 @@ const SpotForm = () => {
               value={formData.lat}
               onChange={handleInputChange}
               placeholder="Latitude"
-              className={errors?.lat ? "error-input" : ""}
+              className={errors.lat ? "error-input" : ""}
             />
-            {errors?.lat && <p className="error">{errors?.lat}</p>}
+            {errors.lat && <p className="error">{errors.lat}</p>}
           </div>
 
           <div className="form-group">
@@ -205,9 +198,9 @@ const SpotForm = () => {
               value={formData.lng}
               onChange={handleInputChange}
               placeholder="Longitude"
-              className={errors?.lng ? "error-input" : ""}
+              className={errors.lng ? "error-input" : ""}
             />
-            {errors?.lng && <p className="error">{errors?.lng}</p>}
+            {errors.lng && <p className="error">{errors.lng}</p>}
           </div>
         </div>
 
@@ -228,12 +221,10 @@ const SpotForm = () => {
             placeholder="Please write at least 30 characters"
             value={formData.description}
             onChange={handleInputChange}
-            className={errors?.description ? "error-input" : ""}
+            className={errors.description ? "error-input" : ""}
             required
           ></textarea>
-          {errors?.description && (
-            <p className="error">{errors?.description}</p>
-          )}
+          {errors.description && <p className="error">{errors.description}</p>}
         </div>
 
         <hr />
@@ -252,10 +243,10 @@ const SpotForm = () => {
             value={formData.name}
             onChange={handleInputChange}
             placeholder="Name of your spot"
-            className={errors?.name ? "error-input" : ""}
+            className={errors.name ? "error-input" : ""}
             required
           />
-          {errors?.name && <p className="error">{errors?.name}</p>}
+          {errors.name && <p className="error">{errors.name}</p>}
         </div>
 
         <hr />
@@ -274,10 +265,10 @@ const SpotForm = () => {
             value={formData.price}
             onChange={handleInputChange}
             placeholder="Price per night (USD)"
-            className={errors?.price ? "error-input" : ""}
+            className={errors.price ? "error-input" : ""}
             required
           />
-          {errors?.price && <p className="error">{errors?.price}</p>}
+          {errors.price && <p className="error">{errors.price}</p>}
         </div>
         <hr />
         <div className="form__section-header">
@@ -293,11 +284,11 @@ const SpotForm = () => {
             value={formData.previewImage}
             onChange={handleInputChange}
             placeholder="Preview Image URL"
-            className={errors?.previewImage ? "error-input" : ""}
+            className={errors.previewImage ? "error-input" : ""}
             required
           />
-          {errors?.previewImage && (
-            <p className="error">{errors?.previewImage}</p>
+          {errors.previewImage && (
+            <p className="error">{errors.previewImage}</p>
           )}
         </div>
 
