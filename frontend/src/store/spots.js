@@ -6,7 +6,7 @@ const SET_SPOT_DETAILS = "spots/GET_SPOT_DETAILS";
 const SET_SPOT_REVIEWS = "spots/SET_SPOT_REVIEWS";
 const ADD_SPOT_IMAGE = "spots/ADD_SPOT_IMAGE";
 const SET_SPOT_IMAGES = "spots/ADD_SPOT_IMAGE";
-// const UPDATE_SPOT = "spots/UPDATE_SPOT";
+const UPDATE_SPOT = "spots/UPDATE_SPOT";
 const DELETE_SPOT = "spots/DELETE_SPOT";
 
 // Action Creators
@@ -51,6 +51,12 @@ export const addSpotAction = (spot) => {
     payload: spot
   };
 };
+export const updateSpotAction = (spot) => {
+  return {
+    type: UPDATE_SPOT,
+    payload: spot
+  };
+};
 
 export const addSpotImage = (image) => {
   return {
@@ -67,20 +73,24 @@ export const fetchSpots = () => (dispatch) => {
     .catch((error) => console.error(error));
 };
 
-export const fetchSpotDetails = (spotId) => (dispatch) => {
-  csrfFetch(`/api/spots/${spotId}`)
-    .then((response) => response.json())
-    .then((data) => {
-      dispatch(setSpotDetails(data));
-    })
-    .catch((error) => console.error(error));
+export const fetchSpotDetails = (spotId) => async (dispatch) => {
+  try {
+    const response = await csrfFetch(`/api/spots/${spotId}`);
+    const data = await response.json();
 
-  csrfFetch(`/api/spots/${spotId}/reviews`)
-    .then((response) => response.json())
-    .then((reviewData) => {
-      dispatch(setSpotReviews(reviewData.Reviews));
-    })
-    .catch((error) => console.error(error));
+    dispatch(setSpotDetails(data));
+
+    const reviewResponse = await csrfFetch(`/api/spots/${spotId}/reviews`);
+    const reviewData = await reviewResponse.json();
+
+    console.log("DATA COMING FROM SPOT", data);
+    dispatch(setSpotReviews(reviewData.Reviews));
+
+    return { spot: data };
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 };
 
 export const addSpot = (spotDetails, imageUrls) => async (dispatch) => {
@@ -118,6 +128,50 @@ export const addSpot = (spotDetails, imageUrls) => async (dispatch) => {
     return error.errors;
   }
 };
+
+export const updateSpot =
+  (spotId, spotDetails, imgUrls) => async (dispatch) => {
+    try {
+      const spotResponse = await csrfFetch(`/api/spots/${spotId}`, {
+        method: "PUT",
+        body: JSON.stringify(spotDetails)
+      });
+
+      if (!spotResponse.ok) {
+        return false;
+      }
+      const spotData = await spotResponse.json();
+      dispatch(updateSpotAction(spotData));
+      const updatedSpot = await dispatch(fetchSpotDetails(spotId));
+      const currentImages = updatedSpot.spot.SpotImages;
+
+      for (const img of currentImages) {
+        await csrfFetch(`/api/spot-images/${img.id}`, {
+          method: "DELETE"
+        });
+      }
+
+      for (const url of imgUrls) {
+        const imgDetails = {
+          url,
+          spotId,
+          preview: url === imgUrls[0]
+        };
+
+        const imageResponse = await csrfFetch(`/api/spots/${spotId}/images`, {
+          method: "POST",
+          body: JSON.stringify(imgDetails)
+        });
+
+        const newImage = await imageResponse.json();
+        dispatch(addSpotImage(newImage));
+      }
+      return { spot: spotData };
+    } catch (error) {
+      console.error(error);
+      return error.errors;
+    }
+  };
 
 export const deleteSpot = (spotId) => async (dispatch) => {
   try {
@@ -188,13 +242,19 @@ const spotsReducer = (state = initialState, action) => {
       // Update the spot in the byId object
       const updatedSpot = {
         ...state.byId[spotId],
-        images: [...(state.byId[spotId]?.images || []), { id, url, preview }]
+        SpotImages: [
+          ...(state.byId[spotId]?.SpotImages || []),
+          { id, url, preview }
+        ]
       };
 
       // Update the spot in the allSpots array
       const updatedAllSpots = state.allSpots.map((spot) =>
         spot.id === spotId
-          ? { ...spot, images: [...(spot.images || []), { id, url, preview }] }
+          ? {
+              ...spot,
+              SpotImages: [...(spot.SpotImages || []), { id, url, preview }]
+            }
           : spot
       );
 
@@ -202,6 +262,15 @@ const spotsReducer = (state = initialState, action) => {
         ...state,
         byId: { ...state.byId, [spotId]: updatedSpot },
         allSpots: updatedAllSpots
+      };
+    }
+
+    case UPDATE_SPOT: {
+      const { byId, allSpots } = _normalizeSpots([action.payload]);
+      return {
+        ...state,
+        byId: { ...state.byId, ...byId },
+        allSpots: [...state.allSpots, ...allSpots]
       };
     }
 
