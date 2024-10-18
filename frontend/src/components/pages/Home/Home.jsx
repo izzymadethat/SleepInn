@@ -13,16 +13,14 @@ const Home = () => {
   }, [dispatch]);
 
   return (
-    <main>
-      <div className="home-container">
-        <h1>
-          Sleep only where you can <span className="primary">dream.</span>
-        </h1>
-        <div className="spots-grid">
-          {spots.map((spot) => (
-            <SpotCard spot={spot} key={spot.id} />
-          ))}
-        </div>
+    <main className="home-container">
+      <h1>
+        Sleep only where you can <span className="primary">dream.</span>
+      </h1>
+      <div className="spots-grid" data-testid="spots-list">
+        {spots.map((spot) => (
+          <SpotCard spot={spot} key={spot.id} />
+        ))}
       </div>
     </main>
   );

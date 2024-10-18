@@ -1,15 +1,12 @@
 import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import "./SignupFormModal.css";
-import { Navigate } from "react-router-dom";
 import * as sessionActions from "../../store/session";
 import { useModal } from "../../context/Modal";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 
 const SignupFormModal = () => {
-  const sessionUser = useSelector((state) => state.session.user);
   const dispatch = useDispatch();
-
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -21,10 +18,10 @@ const SignupFormModal = () => {
   const [errors, setErrors] = useState({});
   const { closeModal } = useModal();
 
-  if (sessionUser) return <Navigate to="/" replace />;
-
   const allInfoEntered =
     firstName && lastName && email && username && password && confirmPassword;
+  const isInvalid =
+    username.length < 4 || password.length < 6 || confirmPassword.length < 6;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -47,12 +44,13 @@ const SignupFormModal = () => {
       .then(closeModal)
       .catch(async (res) => {
         const data = await res.json();
+        console.log(data);
         if (data?.errors) setErrors(data.errors);
       });
   };
 
   return (
-    <>
+    <div data-testid="sign-up-form">
       <h1 className="signup-form__title">Sign Up To Sleep Inn!</h1>
       <form className="signup-form" onSubmit={handleSubmit}>
         <div className="signup-form__input-container">
@@ -61,6 +59,8 @@ const SignupFormModal = () => {
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             required
+            name="firstName"
+            data-testid="first-name-input"
           />
           <label
             htmlFor="firstName"
@@ -77,6 +77,8 @@ const SignupFormModal = () => {
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             required
+            name="lastName"
+            data-testid="last-name-input"
           />
           <label
             htmlFor="lastName"
@@ -93,24 +95,37 @@ const SignupFormModal = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            label="Email"
+            name="email"
+            data-testid="email-input"
           />
           <label htmlFor="email" className={`label ${email ? "active" : ""}`}>
             Email
           </label>
+          {errors.email && (
+            <p className="error" data-testid="email-error-message">
+              {errors.email}
+            </p>
+          )}
         </div>
-        {errors.email && <p className="error">{errors.email}</p>}
         <div className="signup-form__input-container">
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
+            name="username"
+            data-testid="username-input"
           />
 
           <label className={`label password-label ${username ? "active" : ""}`}>
             Username
           </label>
-          {errors.username && <p className="error">{errors.username}</p>}
+          {errors.username && (
+            <p className="error" data-testid="username-error-message">
+              {errors.username}
+            </p>
+          )}
         </div>
 
         <div className="signup-form__input-container">
@@ -119,6 +134,8 @@ const SignupFormModal = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            name="password"
+            data-testid="password-input"
           />
           <label className={`label password-label ${password ? "active" : ""}`}>
             Password
@@ -139,6 +156,7 @@ const SignupFormModal = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
+            data-testid="confirm-password-input"
           />
           <label
             className={`label password-label ${
@@ -158,12 +176,13 @@ const SignupFormModal = () => {
             cursor: !allInfoEntered ? "not-allowed" : "pointer"
           }}
           type="submit"
-          disabled={!allInfoEntered}
+          disabled={!allInfoEntered || isInvalid}
+          data-testid="form-sign-up-button"
         >
-          Sign Up
+          Sign up
         </button>
       </form>
-    </>
+    </div>
   );
 };
 

@@ -81,6 +81,7 @@ formatting all the errors before returning a JSON response. It will include the 
 app.use((err, _req, res, _next) => {
   res.status(err.status || 500);
   console.error(err);
+  console.error(err.type)
 
   if (isProduction) {
     res.json({
@@ -95,13 +96,6 @@ app.use((err, _req, res, _next) => {
       stack: err.stack
     });
   }
-});
-
-process.on("SIGINT", () => {
-  app.close(() => {
-    console.log("Server closed");
-    process.exit(0);
-  });
 });
 
 module.exports = app;

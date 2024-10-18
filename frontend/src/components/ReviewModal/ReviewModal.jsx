@@ -15,6 +15,7 @@ const RatingStars = ({ rating, setRating }) => {
             key={index}
             className={`star ${index < rating ? "filled" : ""}`}
             onClick={() => setRating(index + 1)}
+            data-testid="star-rating"
           />
         ))}
       <label htmlFor="rating">Stars</label>
@@ -48,13 +49,16 @@ const ReviewModal = ({ spotId }) => {
     } else {
       alert("Thank you for your review!");
       closeModal();
+      await dispatch(reviewActions.fetchReviews(spotId));
     }
   };
 
   return (
-    <div className="review-modal">
+    <div className="review-modal" data-testid="review-modal">
       <h2>How was your stay?</h2>
-      {errors && errors.errors && (<p className="error">Something went wrong. Please try again.</p>)}
+      {errors && errors.errors && (
+        <p className="error">Something went wrong. Please try again.</p>
+      )}
       <form onSubmit={handleSubmit}>
         <textarea
           cols={50}

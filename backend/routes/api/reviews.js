@@ -235,6 +235,7 @@ router.post("/", requireAuth, validateReview, async (req, res, next) => {
     }
 
     const starsInt = parseInt(stars, 10);
+    const userIdInt = parseInt(userId, 10);
 
     const newReview = await Review.create({
       userId: Number(userId),
@@ -243,7 +244,12 @@ router.post("/", requireAuth, validateReview, async (req, res, next) => {
       stars: starsInt
     });
 
-    return res.json(newReview);
+    // Fetch the full review including the user information
+    const fullReview = await Review.findByPk(newReview.id, {
+      include: { model: User, attributes: ["firstName", "lastName"] }
+    });
+
+    return res.json(fullReview);
   } catch (error) {
     next(error);
   }

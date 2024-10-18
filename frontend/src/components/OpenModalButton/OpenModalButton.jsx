@@ -15,7 +15,12 @@ const OpenModalButton = ({
   };
 
   return (
-    <button onClick={onClick} className={props.className} style={props.style}>
+    <button
+      onClick={onClick}
+      className={props.className}
+      style={props.style}
+      data-testid={props.dataTestId}
+    >
       {buttonText}
     </button>
   );

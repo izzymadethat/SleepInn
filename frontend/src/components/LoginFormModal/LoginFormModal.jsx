@@ -16,6 +16,22 @@ const LoginFormModal = () => {
   const hasNoCredentials = !credential || !password;
   const isInvalid = credential.length < 4 || password.length < 6;
 
+  const handleDemoUserLogin = () => {
+    const demoUser = {
+      credential: "demo@user.io",
+      password: "password"
+    };
+    dispatch(sessionActions.loginUser(demoUser))
+      .then(closeModal)
+      .catch(async (res) => {
+        const data = await res.json();
+        if (data?.errors) {
+          setErrors(data.errors);
+          setPassword("");
+        }
+      });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setErrors({});
@@ -31,7 +47,7 @@ const LoginFormModal = () => {
   };
 
   return (
-    <>
+    <div className="login-modal" data-testid="login-modal">
       <h1 className="login-form__title">Login</h1>
       <form className="login-form" onSubmit={handleSubmit}>
         <div className="login-form__input-container">
@@ -41,6 +57,7 @@ const LoginFormModal = () => {
             onChange={(e) => setCredential(e.target.value)}
             required
             id="username-or-email"
+            data-testid="credential-input"
           />
           <label
             htmlFor="username-or-email"
@@ -56,6 +73,7 @@ const LoginFormModal = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
             id="password"
+            data-testid="password-input"
           />
           <label
             htmlFor="password"
@@ -76,6 +94,16 @@ const LoginFormModal = () => {
           </button>
         </div>
 
+        <div className="login-form__demo-user">
+          <button
+            type="button"
+            onClick={handleDemoUserLogin}
+            data-testid="demo-user-button"
+          >
+            Log in as Demo User
+          </button>
+        </div>
+
         <button
           style={{
             opacity: credential && password ? 1 : 0.5,
@@ -83,11 +111,12 @@ const LoginFormModal = () => {
           }}
           type="submit"
           disabled={hasNoCredentials || isInvalid}
+          data-testid="login-button"
         >
-          Log In
+          Log in
         </button>
       </form>
-    </>
+    </div>
   );
 };
 

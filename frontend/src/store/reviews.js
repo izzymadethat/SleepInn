@@ -54,10 +54,12 @@ export const addNewReview = (spotId, review) => async (dispatch) => {
     if (response.ok) {
       const newReview = await response.json();
       dispatch(addReview(newReview));
-      return newReview;
+      dispatch(fetchReviews(spotId));
+      return true;
     } else {
       const errorData = await response.json();
       return errorData.errors;
+      return false;
     }
   } catch (error) {
     return error.errors || ["Error adding review"];

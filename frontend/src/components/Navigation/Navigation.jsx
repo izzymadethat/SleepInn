@@ -10,7 +10,7 @@ const Navigation = ({ isLoaded }) => {
   return (
     <nav className="nav-bar">
       <li>
-        <NavLink to="/" className="logo">
+        <NavLink to="/" className="logo" data-testid="logo">
           <IoBed />
           <span>
             Sleep

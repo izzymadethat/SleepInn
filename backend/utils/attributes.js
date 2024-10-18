@@ -14,7 +14,7 @@ exports.spotAttributes = [
   "lng",
   "name",
   "description",
-  "price",
+  "price"
 ];
 
 exports.imageAttributes = ["id", "url"];

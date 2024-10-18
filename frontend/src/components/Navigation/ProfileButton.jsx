@@ -41,13 +41,14 @@ const ProfileButton = ({ user }) => {
   const logout = (e) => {
     e.preventDefault();
     dispatch(sessionActions.logoutUser());
+    closeMenu();
   };
 
   const ulClassName = "profile-dropdown" + (showMenu ? "" : " hidden");
 
   return (
     <>
-      <div className="profile-button-container">
+      <div className="profile-button-container" data-testid="user-menu-button">
         <button className="profile-button" onClick={toggleMenu}>
           <div>
             <MdOutlineMenu />
@@ -55,17 +56,19 @@ const ProfileButton = ({ user }) => {
           <div>{showMenu ? <RiUserReceivedFill /> : <RiUserShared2Fill />}</div>
         </button>
       </div>
-      <ul className={ulClassName} ref={ulRef}>
+      <ul className={ulClassName} ref={ulRef} data-testid="user-dropdown-menu">
         {user ? (
           <>
             <h3>My Sleep Profile</h3>
             <hr />
 
-            <li>Hello, {user.username}</li>
+            <li>Hello, {user.firstName}</li>
 
             <li>{user.email}</li>
             <li>
-              <Link to="/spots/current">Manage Spots</Link>
+              <Link to="/spots/current" data-testid="manage-spots-link">
+                Manage Spots
+              </Link>
             </li>
             <li>
               <button onClick={logout} className="site-btn primary">
@@ -77,14 +80,14 @@ const ProfileButton = ({ user }) => {
           <>
             <li className="profile-dropdown__link">
               <OpenModalButton
-                buttonText="Log In"
+                buttonText="Log in"
                 onButtonClick={closeMenu}
                 modalComponent={<LoginFormModal />}
               />
             </li>
             <li className="profile-dropdown__link">
               <OpenModalButton
-                buttonText="Sign Up"
+                buttonText="Sign up"
                 onButtonClick={closeMenu}
                 modalComponent={<SignupFormModal />}
               />

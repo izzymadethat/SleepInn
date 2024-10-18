@@ -1,19 +1,17 @@
 .images-grid__main {
   display: grid;
-  grid-template-columns: 3fr 2fr;
-  gap: 0.25rem;
+  grid-template-columns: 1fr 1fr;
 }
 
 .images-grid__secondary {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 0.25rem;
 }
 
-.images-grid__img-container {
+/* .images-grid__img-container {
   width: 100%;
   height: 100%;
-}
+} */
 
 /* .images-grid__secondary div img {
   width: 100%;
@@ -26,6 +24,7 @@
 
 .images-grid__img-container img {
   width: 100%;
+  height: 100%;
   object-fit: cover;
   transition: all 0.2s ease-in-out;
 }

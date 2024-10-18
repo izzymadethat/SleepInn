@@ -28,7 +28,7 @@ const ManageSpots = () => {
 
   if (userSpots.length === 0) {
     return (
-      <main className="container">
+      <main className="container" data-testid="user-spots">
         <div className="container__header">
           <h1>Manage Your Spots</h1>
         </div>
@@ -43,9 +43,9 @@ const ManageSpots = () => {
   }
 
   return (
-    <main className="container">
+    <main className="container" data-testid="user-spots">
       <div className="container__header">
-        <h1>Manage Your Spots</h1>
+        <h1>Manage Spots</h1>
         <Link to="/spots/new" className="site-btn secondary">
           Create a New Spot
         </Link>
@@ -53,7 +53,7 @@ const ManageSpots = () => {
       <div className="spots-grid">
         {userSpots.map((spot) => (
           <div key={spot.id}>
-            <SpotCard key={spot.id} spot={spot} />
+            <SpotCard key={spot.id} spot={spot} data-testid="spot-tile" />
             <div className="spots-grid__actions">
               <Link
                 to={`/spots/${spot.id}/edit`}
