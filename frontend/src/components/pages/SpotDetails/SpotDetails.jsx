@@ -8,6 +8,7 @@ import * as reviewActions from "../../../store/reviews";
 import OpenModalButton from "../../OpenModalButton";
 import ReviewModal from "../../ReviewModal";
 import { useModal } from "../../../context/Modal";
+import Loading from "../../Loading/Loading";
 
 const PlaceHolderImagesGrid = () => {
   const imageUrls = Array(4).fill(
@@ -105,7 +106,7 @@ const SpotDetails = () => {
   }, [dispatch, spotId]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   return (

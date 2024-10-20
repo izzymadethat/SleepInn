@@ -62,15 +62,30 @@ const ProfileButton = ({ user }) => {
             <h3>My Sleep Profile</h3>
             <hr />
 
-            <li>Hello, {user.firstName}</li>
-
-            <li>{user.email}</li>
             <li>
+              Hello,{" "}
+              <span style={{ fontWeight: "bold", color: "#ff6f61" }}>
+                {user.firstName}
+              </span>
+            </li>
+
+            <li style={{ fontStyle: "italic" }}>{user.email}</li>
+
+            <li
+              style={{
+                textAlign: "center",
+                borderTop: "1px solid black",
+                borderBottom: "1px solid black",
+                padding: ".5rem 0",
+                width: "95%"
+              }}
+            >
               <Link to="/spots/current" data-testid="manage-spots-link">
                 Manage Spots
               </Link>
             </li>
-            <li>
+
+            <li style={{ marginTop: "-1rem" }}>
               <button onClick={logout} className="site-btn primary">
                 Log Out <RiLogoutBoxRLine />
               </button>

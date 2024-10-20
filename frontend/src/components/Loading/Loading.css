@@ -1,0 +1,28 @@
+.loading-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.loading-container h1 {
+  font-size: 5rem;
+  transform: perspective(100px) rotateX(10deg) rotateY(10deg);
+  animation: snooze 1.5s infinite ease-in-out;
+}
+
+.loading-container .loading-text {
+  font-size: 2rem;
+  color: #ff6f61;
+  animation: snooze 1.5s infinite ease-in-out;
+}
+
+@keyframes snooze {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}

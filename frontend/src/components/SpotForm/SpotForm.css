@@ -1,7 +1,7 @@
 .create-spot-form {
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 1.75rem;
   border: 1px solid #ccc;
   border-radius: 0.625rem;
 }
