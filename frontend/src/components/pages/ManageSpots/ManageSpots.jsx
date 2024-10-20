@@ -43,17 +43,17 @@ const ManageSpots = () => {
   }
 
   return (
-    <main className="container" data-testid="user-spots">
+    <main className="container">
       <div className="container__header">
         <h1>Manage Spots</h1>
         <Link to="/spots/new" className="site-btn secondary">
           Create a New Spot
         </Link>
       </div>
-      <div className="spots-grid">
+      <div className="spots-grid" data-testid="user-spots">
         {userSpots.map((spot) => (
           <div key={spot.id}>
-            <SpotCard key={spot.id} spot={spot} data-testid="spot-tile" />
+            <SpotCard key={spot.id} spot={spot} />
             <div className="spots-grid__actions">
               <Link
                 to={`/spots/${spot.id}/edit`}

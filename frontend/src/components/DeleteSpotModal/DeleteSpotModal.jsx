@@ -20,7 +20,7 @@ const DeleteSpotModal = ({ spot }) => {
   };
 
   return (
-    <>
+    <div data-testid="delete-spot-modal">
       <h1>Confirm Delete</h1>
       <p>Are You Sure You Want to Delete this Spot?</p>
       <div
@@ -30,6 +30,7 @@ const DeleteSpotModal = ({ spot }) => {
           onClick={handleDeleteSpot}
           className="site-btn primary"
           style={{ backgroundColor: "red" }}
+          data-testid="confirm-delete-spot-button"
         >
           Yes (Delete Spot)
         </button>
@@ -43,11 +44,12 @@ const DeleteSpotModal = ({ spot }) => {
             color: "white",
             border: "none"
           }}
+          data-testid="cancel-delete-spot-button"
         >
           No (Keep Spot)
         </button>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -5,7 +5,11 @@ import { FaStar } from "react-icons/fa6";
 const SpotCard = ({ spot }) => {
   return (
     <div data-testid="spot-tile">
-      <Link to={`/spots/${spot.id}`} className="spot-card">
+      <Link
+        to={`/spots/${spot.id}`}
+        className="spot-card"
+        data-testid="spot-link"
+      >
         <ToolTip text={spot.name}>
           <div>
             <div className="spot-card__img-container">

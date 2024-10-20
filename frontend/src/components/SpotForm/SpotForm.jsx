@@ -33,9 +33,6 @@ function validateForm(formData) {
   if (!formData.previewImage) {
     errors.previewImage = "Please upload a preview image for your spot";
   }
-  if (formData.images.length < 1) {
-    errors.images = "Please upload at least one image for your spot";
-  }
   return errors;
 }
 
@@ -101,7 +98,6 @@ const SpotForm = () => {
   };
 
   const handleImageChange = (index, value) => {
-    console.log("CHANGING IMAGE", index, value);
     const newImages = [...formData.images];
     newImages[index] = value;
     setFormData({ ...formData, images: newImages });
@@ -110,6 +106,7 @@ const SpotForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
+
     const validationErrors = validateForm(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -122,15 +119,14 @@ const SpotForm = () => {
       lng: parseFloat(formData.lng)
     };
     const imageUrls = [formData.previewImage, ...formData.images];
-
     try {
       if (isEdit) {
-        await dispatch(spotActions.updateSpot(spotId, spotData, imageUrls));
-        await dispatch(spotActions.fetchSpotDetails(spotId));
+        dispatch(spotActions.updateSpot(spotId, spotData, imageUrls));
+        dispatch(spotActions.fetchSpotDetails(spotId));
         navigate(`/spots/${spotId}`);
       } else {
         const res = await dispatch(spotActions.addSpot(spotData, imageUrls));
-        navigate(`/spots/${res.spot.id}`); // Ensure you're referencing the correct property
+        navigate(`/spots/${res.spot.id}`);
       }
     } catch (error) {
       const errorRes = await error.json();

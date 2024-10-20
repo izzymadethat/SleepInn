@@ -15,7 +15,7 @@ const RatingStars = ({ rating, setRating }) => {
             key={index}
             className={`star ${index < rating ? "filled" : ""}`}
             onClick={() => setRating(index + 1)}
-            data-testid="star-rating"
+            data-testid="review-star-clickable"
           />
         ))}
       <label htmlFor="rating">Stars</label>
@@ -59,7 +59,7 @@ const ReviewModal = ({ spotId }) => {
       {errors && errors.errors && (
         <p className="error">Something went wrong. Please try again.</p>
       )}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} data-testid="review-form">
         <textarea
           cols={50}
           rows={10}

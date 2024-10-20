@@ -24,7 +24,9 @@ const Navigation = ({ isLoaded }) => {
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           {sessionUser && (
             <li>
-              <NavLink to="/spots/new">Create a new Spot</NavLink>
+              <NavLink to="/spots/new" data-testid="create-new-spot-button">
+                Create a New Spot
+              </NavLink>
             </li>
           )}
           <li>

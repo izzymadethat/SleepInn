@@ -46,7 +46,7 @@ const DeleteReviewModal = ({ spotId, review }) => {
   };
 
   return (
-    <>
+    <div data-testid="delete-review-modal">
       <h1>Confirm Delete</h1>
       <p>Are you sure you want to delete this review?</p>
       <div
@@ -56,6 +56,7 @@ const DeleteReviewModal = ({ spotId, review }) => {
           onClick={handleDeleteReview}
           className="site-btn primary"
           style={{ backgroundColor: "red" }}
+          data-testid="confirm-delete-review-button"
         >
           Yes (Delete Review)
         </button>
@@ -73,7 +74,7 @@ const DeleteReviewModal = ({ spotId, review }) => {
           No (Keep Review)
         </button>
       </div>
-    </>
+    </div>
   );
 };
 
@@ -112,27 +113,29 @@ const SpotDetails = () => {
       <div className="container__header">
         <h1 data-testid="spot-name">{spot.name}</h1>
         <h3 data-testid="spot-location">
-          {spot.city}, {spot.state}, {spot.country}
+          <span data-testid="spot-city">{spot.city}</span>,{" "}
+          <span>{spot.state}</span>, <span>{spot.country}</span>
         </h3>
       </div>
       <div className="images-grid__main">
-        <div
-          className="images-grid__img-container"
-          data-testid="spot-large-image"
-        >
-          <img src={mainImage.url} alt={`${spot.name} preview image`} />
+        <div className="images-grid__img-container">
+          <img
+            src={mainImage.url}
+            alt={`${spot.name} preview image`}
+            data-testid="spot-large-image"
+          />
         </div>
 
         <div className="images-grid__secondary">
           {spot.SpotImages.length > 1 ? (
             <>
               {spot.SpotImages.slice(1, 5).map((img) => (
-                <div
-                  className="images-grid__img-container"
-                  key={img.id}
-                  data-testid="spot-small-image"
-                >
-                  <img src={img.url} alt={`${spot.name} preview image`} />
+                <div className="images-grid__img-container" key={img.id}>
+                  <img
+                    src={img.url}
+                    alt={`${spot.name} preview image`}
+                    data-testid="spot-small-image"
+                  />
                 </div>
               ))}
             </>
@@ -153,13 +156,10 @@ const SpotDetails = () => {
           </div>
         </div>
 
-        <div
-          className="spot-details__booking-info"
-          data-testid="spot-callout-box"
-        >
-          <div className="spot-details__price">
+        <div className="spot-details__booking-info">
+          <div className="spot-details__price" data-testid="spot-callout-box">
             <h3 data-testid="spot-price">${spot.price}/night</h3>
-            <div dataTestId="spot-rating">
+            <div data-testid="spot-rating">
               <FaStar />{" "}
               {reviews.length === 0 ? (
                 <span>New</span>
@@ -198,7 +198,7 @@ const SpotDetails = () => {
                   buttonText={"Post Your Review"}
                   modalComponent={<ReviewModal spotId={spotId} />}
                   className="site-btn secondary"
-                  dataTestId="review-button"
+                  data-testid="review-button"
                 />
                 <p>Be the first</p>
               </div>
@@ -207,7 +207,7 @@ const SpotDetails = () => {
         ) : (
           <h2 data-id="reviews-heading">
             <FaStar /> {spot.avgStarRating?.toFixed(1)}{" "}
-            <span>
+            <span data-testid="review-count">
               <span style={{ position: "relative", bottom: ".375rem" }}>.</span>{" "}
               {spot.numReviews} review
               {spot.numReviews > 1 && "s"}
@@ -216,7 +216,7 @@ const SpotDetails = () => {
         )}
 
         {reviews.length > 0 && (
-          <>
+          <div>
             {currentUser && !isSpotOwner && !userHasReviewed && (
               <div>
                 <OpenModalButton
@@ -224,21 +224,26 @@ const SpotDetails = () => {
                   modalComponent={<ReviewModal spotId={spotId} />}
                   className="site-btn secondary"
                   style={{ margin: "0.625rem 0" }}
+                  datatestid="review-button"
                 />
               </div>
             )}
             {reviews.map((review) => (
-              <div className="review-card" key={review.id}>
+              <div
+                className="review-card"
+                key={review.id}
+                data-testid="review-item"
+              >
                 <div>
                   <h3>{review.User.firstName}</h3>
-                  <p>
+                  <p data-testid="review-date">
                     {new Date(review.createdAt).toLocaleDateString("en-US", {
                       month: "2-digit",
                       year: "numeric"
                     })}
                   </p>
                 </div>
-                <p>{review.review}</p>
+                <p data-testid="review-text">{review.review}</p>
                 {review.userId === currentUser?.id && (
                   <div className="review-actions">
                     <OpenModalButton
@@ -267,7 +272,7 @@ const SpotDetails = () => {
                 )}
               </div>
             ))}
-          </>
+          </div>
         )}
       </div>
     </main>

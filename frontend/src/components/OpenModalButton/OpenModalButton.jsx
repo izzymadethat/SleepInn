@@ -19,7 +19,7 @@ const OpenModalButton = ({
       onClick={onClick}
       className={props.className}
       style={props.style}
-      data-testid={props.dataTestId}
+      data-testid={props.datatestid}
     >
       {buttonText}
     </button>
